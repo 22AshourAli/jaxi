@@ -31,7 +31,7 @@ export function LiveQueueDisplay({ shop, locale, dict }: Props) {
 
         <div className="w-full max-w-md space-y-3">
           <h2 className="text-sm font-medium text-muted-foreground">
-            {dict.queue.title.replace("{shop}", "")} ({waiting.length})
+            {locale === "ar" ? "الطابور" : "Queue"} ({waiting.length})
           </h2>
           <div className="space-y-2">
             {waiting.slice(0, 10).map((entry, idx) => (
@@ -55,7 +55,7 @@ export function LiveQueueDisplay({ shop, locale, dict }: Props) {
         </div>
 
         <div className="text-center text-sm text-muted-foreground">
-          {dict.queue.title.replace("{shop}", shop.name)}
+          {shop.name} - {locale === "ar" ? "شاشة الطابور الحية" : "Live Queue Display"}
         </div>
       </main>
     </div>

@@ -46,7 +46,14 @@ export default function LoginForm() {
       setMsg(error.message);
       return;
     }
-    router.push(`/${locale}/dashboard/${phone}`);
+    const { data: shop } = await supabase
+      .from("shops")
+      .select("id")
+      .eq("phone", phone as string)
+      .maybeSingle();
+    if (shop) {
+      router.push(`/${locale}/dashboard/${(shop as { id: string }).id}`);
+    }
   }
 
   const isRtl = locale === "ar";
