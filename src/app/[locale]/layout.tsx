@@ -11,7 +11,7 @@ export default async function LocaleLayout({
   if (!isValidLocale(locale)) notFound();
 
   return (
-    <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
+    <ThemeProvider>
       {children}
     </ThemeProvider>
   );

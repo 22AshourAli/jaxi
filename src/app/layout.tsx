@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Arabic, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const notoSans = Noto_Sans_Arabic({
@@ -52,6 +53,11 @@ export default function RootLayout({
       className={`${notoSans.variable} ${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`(function(){try{var t=localStorage.getItem("theme");var r=t||"system";if(r==="system"){r=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"}document.documentElement.setAttribute("data-theme",r)}catch(e){}})()`}
+        </Script>
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
