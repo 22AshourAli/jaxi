@@ -16,7 +16,7 @@
     "close": "Close"
   },
   "customer": {
-    "scanTitle": "Scan QR to join the queue",
+    "scanTitle": "Select a Shop",
     "selectService": "Select Service",
     "getTicket": "Get My Turn",
     "yourNumber": "Your Turn Number",

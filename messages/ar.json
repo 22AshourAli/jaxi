@@ -16,7 +16,7 @@
     "close": "إغلاق"
   },
   "customer": {
-    "scanTitle": "مسح QR للدخول في الطابور",
+    "scanTitle": "اختر المحل",
     "selectService": "اختر الخدمة",
     "getTicket": "خذ دوري",
     "yourNumber": "رقم دورك",
