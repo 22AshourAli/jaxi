@@ -1,0 +1,95 @@
+{
+  "site": {
+    "title": "Dawrk",
+    "tagline": "Smart Queue Management System"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close"
+  },
+  "customer": {
+    "scanTitle": "Scan QR to join the queue",
+    "selectService": "Select Service",
+    "getTicket": "Get My Turn",
+    "yourNumber": "Your Turn Number",
+    "waitingMessage": "{count} people ahead of you",
+    "estimatedTime": "Estimated wait time",
+    "minutes": "minutes",
+    "peopleAhead": "People ahead",
+    "queueStatus": "Queue Status",
+    "currentlyServing": "Now serving",
+    "notifyMe": "Notify me when my turn is near",
+    "whatsappNotify": "Send WhatsApp notification",
+    "browserNotify": "Browser notification",
+    "leaveQueue": "Leave queue",
+    "ticketInfo": "Ticket Info",
+    "scanAgain": "Scan another QR",
+    "installApp": "Install App",
+    "installIOS": "To install, tap the share button then 'Add to Home Screen'"
+  },
+  "dashboard": {
+    "login": "Login",
+    "phoneNumber": "Phone Number",
+    "sendOTP": "Send OTP",
+    "verifyOTP": "Verify Code",
+    "otpSent": "Verification code sent to {phone}",
+    "enterOTP": "Enter verification code",
+    "queueManagement": "Queue Management",
+    "currentQueue": "Current Queue",
+    "waiting": "Waiting",
+    "serving": "Serving",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "callNext": "Call Next",
+    "markComplete": "Mark Complete",
+    "markNoShow": "No Show",
+    "noQueue": "No customers in queue",
+    "analytics": "Analytics",
+    "peakHours": "Peak Hours",
+    "avgWaitTime": "Average Wait Time",
+    "totalCustomers": "Total Customers",
+    "dailyStats": "Daily Stats",
+    "weeklyStats": "Weekly Stats",
+    "monthlyStats": "Monthly Stats",
+    "avgServiceTime": "Average Service Time",
+    "settings": "Settings",
+    "shopName": "Shop Name",
+    "shopPhone": "Shop Phone",
+    "workingHours": "Working Hours",
+    "services": "Services",
+    "addService": "Add Service",
+    "serviceName": "Service Name",
+    "duration": "Duration (minutes)",
+    "logout": "Logout",
+    "dashboard": "Dashboard"
+  },
+  "queue": {
+    "title": "{shop} Queue",
+    "liveDisplay": "Live Display",
+    "ticket": "Turn Number",
+    "status": "Status",
+    "time": "Time"
+  },
+  "locale": {
+    "switchTo": "العربية"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "notFoundDesc": "Sorry, the page you're looking for doesn't exist",
+    "queueNotFound": "This queue is not available",
+    "shopNotFound": "This shop doesn't exist"
+  }
+}
