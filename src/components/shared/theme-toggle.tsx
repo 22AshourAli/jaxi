@@ -12,15 +12,22 @@ export function ThemeToggle() {
     () => false
   );
 
-  if (!mounted) return <div className="h-5 w-5" />;
+  if (!mounted) return <div className="h-8 w-8" />;
+
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  function toggle() {
+    setTheme(isDark ? "light" : "dark");
+  }
 
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="rounded-lg p-2 transition hover:bg-muted"
-      aria-label="Toggle theme"
+      onClick={toggle}
+      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-90"
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      <Sun className={`h-4 w-4 transition-all duration-200 ${isDark ? "hidden" : ""}`} />
+      <Moon className={`h-4 w-4 transition-all duration-200 ${isDark ? "" : "hidden"}`} />
     </button>
   );
 }

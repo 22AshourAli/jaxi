@@ -4,8 +4,8 @@
 
 | Category | Choice | Version | Rationale |
 |----------|--------|---------|-----------|
-| Framework | Next.js | 16.2.6 | App Router, Turbopack default, React 19.2 |
-| Language | TypeScript | 5.x | Strict mode, type safety |
+| Framework | Next.js | 16.2.6 | App Router, Turbopack default, React 19.2.6 |
+| Language | TypeScript | 6.0.3 | Strict mode, type safety |
 | Styling | Tailwind CSS | 4.x | CSS variables, dark mode, zero-runtime |
 | Database | Supabase (Postgres) | — | Realtime, Auth, hosted |
 | Realtime | Supabase Realtime | — | Live queue updates via Postgres changes |
@@ -172,10 +172,23 @@ Client subscribes → Supabase Realtime channel on queue_entries
 - [x] Vercel deployment config (vercel.json)
 - [x] CI/CD pipeline (GitHub Actions workflow)
 - [x] Security headers (CSP, nosniff, X-Frame-Options)
+- [x] Runtime error guard: `useDictionary` null-safety on all 4 dashboard pages
+- [x] React 19.2.6 upgrade (critical patch)
+- [x] TypeScript 6.0.3 migration
+- [x] E2E test suite (Playwright — 4 spec files covering customer, barber, i18n, PWA)
+- [x] Accessibility: `aria-label` on all form inputs, buttons, and toggles
+- [x] SEO: dynamic `lang`/`dir` on `<html>` based on URL locale (inline script)
+- [x] PNG icon fallbacks (192×192 + 512×512) for older browsers
+- [x] Manifest fixed: `/manifest.webmanifest` (was `/manifest.json`)
+- [x] Root `page.tsx` — boilerplate replaced with locale-aware redirect (cookies + Accept-Language)
+- [x] `error.tsx` root boundary — graceful error UI with retry button
+- [x] `loading.tsx` root boundary — animated spinner during page load
+- [x] `not-found.tsx` — i18n-aware (Arabic/English), dynamic `dir`/`lang`, locale detection
+- [x] Landing page (`/[locale]/page.tsx`) — handles Supabase error, empty shops, and null data gracefully
+- [x] Analytics page — `avgServiceTime` computed correctly (was showing `avgWait` twice)
+- [x] `globals.css` — added `color-scheme`, `--ring` variable, `:focus-visible` outline, `@keyframes spin`
+- [x] Theme toggle — animated Sun/Moon rotation transition
+- [x] Cleanup: removed stale `public/public/` directory and CRA boilerplate SVGs
 
 ### ❌ PENDING (Future iterations)
-- [ ] E2E tests (Playwright)
-- [ ] Performance: Lighthouse score optimization
-- [ ] Accessibility: full audit (axe-core)
 - [ ] Dashboard: multiple barber support
-- [ ] Actual PNG icon generation (SVG → PNG for older browsers)

@@ -62,6 +62,7 @@ export type Database = {
           shop_id: string;
           service_id: string | null;
           ticket_number: number;
+          customer_name: string | null;
           customer_phone: string | null;
           status: "waiting" | "serving" | "completed" | "cancelled" | "no_show";
           created_at: string;
@@ -74,6 +75,7 @@ export type Database = {
           shop_id: string;
           service_id?: string | null;
           ticket_number: number;
+          customer_name?: string | null;
           customer_phone?: string | null;
           status?: "waiting" | "serving" | "completed" | "cancelled" | "no_show";
           created_at?: string;
@@ -86,6 +88,7 @@ export type Database = {
           shop_id?: string;
           service_id?: string | null;
           ticket_number?: number;
+          customer_name?: string | null;
           customer_phone?: string | null;
           status?: "waiting" | "serving" | "completed" | "cancelled" | "no_show";
           created_at?: string;

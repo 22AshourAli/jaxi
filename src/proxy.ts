@@ -9,7 +9,11 @@ function getLocale(request: Request): string {
     negotiatorHeaders[key] = value;
   });
   const languages = new Negotiator({ headers: negotiatorHeaders }).languages();
-  return match(languages, [...locales], defaultLocale);
+  try {
+    return match(languages, [...locales], defaultLocale);
+  } catch {
+    return defaultLocale;
+  }
 }
 
 export function proxy(request: Request) {

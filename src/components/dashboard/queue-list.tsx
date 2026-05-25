@@ -1,12 +1,13 @@
 "use client";
 
-import { Phone, Check, X } from "lucide-react";
+import { Phone, Check, X, Clock } from "lucide-react";
 
 type QueueEntry = {
   id: string;
   ticket_number: number;
   status: string;
   customer_phone: string | null;
+  customer_name?: string | null;
   created_at: string;
 };
 
@@ -17,10 +18,19 @@ type Props = {
   onNoShow: (id: string) => void;
 };
 
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  return `${Math.floor(minutes / 60)}h ago`;
+}
+
 export function QueueList({ entries, dict, onComplete, onNoShow }: Props) {
   if (entries.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center">
+      <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center">
+        <Clock className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
         <p className="text-muted-foreground">{dict.dashboard.noQueue}</p>
       </div>
     );
@@ -28,19 +38,29 @@ export function QueueList({ entries, dict, onComplete, onNoShow }: Props) {
 
   return (
     <div className="space-y-2">
-      {entries.map((entry) => (
+      <div className="flex items-center justify-between px-1 py-2">
+        <p className="text-sm font-medium text-muted-foreground">
+          {dict.dashboard.waiting} ({entries.length})
+        </p>
+      </div>
+      {entries.map((entry, i) => (
         <div
           key={entry.id}
-          className="flex items-center justify-between rounded-xl border border-border bg-card p-4 transition hover:border-primary/30"
+          className="animate-slide-up flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md"
+          style={{ animationDelay: `${i * 50}ms`, animationFillMode: "backwards" }}
         >
           <div className="flex items-center gap-4">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 text-lg font-bold text-primary shadow-sm">
               #{entry.ticket_number}
             </span>
             <div>
-              <p className="font-medium">{dict.dashboard.waiting}</p>
+              <p className="font-medium">{entry.customer_name || dict.dashboard.waiting}</p>
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                {timeAgo(entry.created_at)}
+              </p>
               {entry.customer_phone && (
-                <p className="flex items-center gap-1 text-sm text-muted-foreground">
+                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                   <Phone className="h-3 w-3" />
                   {entry.customer_phone}
                 </p>
@@ -50,17 +70,19 @@ export function QueueList({ entries, dict, onComplete, onNoShow }: Props) {
           <div className="flex gap-2">
             <button
               onClick={() => onComplete(entry.id)}
-              className="rounded-lg border border-success/30 p-2 text-success transition hover:bg-success/10"
+              className="flex items-center gap-1 rounded-xl border border-success/30 px-3 py-2 text-xs font-medium text-success transition hover:bg-success/10 active:scale-95"
               title={dict.dashboard.markComplete}
             >
-              <Check className="h-4 w-4" />
+              <Check className="h-3.5 w-3.5" />
+              {dict.dashboard.markComplete}
             </button>
             <button
               onClick={() => onNoShow(entry.id)}
-              className="rounded-lg border border-destructive/30 p-2 text-destructive transition hover:bg-destructive/10"
+              className="flex items-center gap-1 rounded-xl border border-destructive/30 px-3 py-2 text-xs font-medium text-destructive transition hover:bg-destructive/10 active:scale-95"
               title={dict.dashboard.markNoShow}
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
+              {dict.dashboard.markNoShow}
             </button>
           </div>
         </div>
