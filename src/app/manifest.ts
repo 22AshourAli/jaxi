@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "دورك - Dawrk",
-    short_name: "دورك",
-    description: "نظام إدارة قوائم الانتظار الذكي",
+    name: "الحلاق - Barber",
+    short_name: "الحلاق",
+    description: "حجز دورك في صالون الحلاقة",
     start_url: "/ar",
     display: "standalone",
     background_color: "#ffffff",

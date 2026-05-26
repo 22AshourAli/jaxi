@@ -16,27 +16,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dawrk.app"),
+  metadataBase: new URL("https://dorak-pearl.vercel.app"),
   title: {
-    default: "دورك - Dawrk",
-    template: "%s | دورك - Dawrk",
+    default: "الحلاق - Barber",
+    template: "%s | الحلاق - Barber",
   },
-  description: "نظام إدارة قوائم الانتظار الذكي للمحلات الخدمية | Smart Queue Management System",
+  description: "حجز دورك في صالون الحلاقة - Queue booking for your barbershop",
   manifest: "/manifest.webmanifest",
   icons: [{ rel: "icon", url: "/icons/icon-192x192.svg", type: "image/svg+xml" }],
-  keywords: ["queue", "طابور", "دورك", "dawrk", "barber", "حلاق", "waiting list"],
-  authors: [{ name: "Dawrk" }],
+  keywords: ["barber", "حلاق", "queue", "حجز", "haircut", "الحلاق", "waiting list"],
   openGraph: {
-    title: "دورك - Dawrk",
-    description: "نظام إدارة قوائم الانتظار الذكي",
+    title: "الحلاق - Barber",
+    description: "حجز دورك في صالون الحلاقة",
     type: "website",
     locale: "ar_AR",
     images: [{ url: "/icons/icon-512x512.svg" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "دورك - Dawrk",
-    description: "نظام إدارة قوائم الانتظار الذكي",
+    title: "الحلاق - Barber",
+    description: "حجز دورك في صالون الحلاقة",
     images: ["/icons/icon-512x512.svg"],
   },
 };

@@ -645,7 +645,7 @@ export function JoinForm({ locale, dict }: Props) {
           <Scissors className="h-8 w-8 text-white" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight">
-          {locale === "ar" ? "خذ دورك الآن" : "Take Your Turn"}
+          {locale === "ar" ? "احجز مكانك" : "Book Your Spot"}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {locale === "ar" ? "أدخل بياناتك واحجز مكانك" : "Enter your info to book your spot"}
