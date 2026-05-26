@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Check, X, Clock } from "lucide-react";
+import { Phone, Check, X, Clock, Scissors } from "lucide-react";
 import { PhoneDisplay } from "@/components/shared/phone-display";
 
 type QueueEntry = {
@@ -58,9 +58,12 @@ export function QueueList({ entries, dict, onComplete, onNoShow }: Props) {
             <div>
               <p className="font-medium">{entry.customer_name || dict.dashboard.waiting}</p>
               {entry.service_name && (
-                <p className="text-[10px] text-primary/60 font-medium">{entry.service_name}</p>
+                <p className="mt-0.5 flex items-center gap-1 text-[10px] text-primary/60 font-medium">
+                  <Scissors className="h-3 w-3" />
+                  {entry.service_name}
+                </p>
               )}
-              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <p className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                 <Clock className="h-3 w-3" />
                 {timeAgo(entry.created_at)}
               </p>

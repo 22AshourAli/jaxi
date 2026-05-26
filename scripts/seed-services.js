@@ -5,33 +5,37 @@ const s = createClient(
 );
 
 async function main() {
-  await s.from('services').delete().eq('name', 'test');
-
-  const services = [
-    ['حلاقة شعر', 30, 1],
-    ['حلاقة دقن', 15, 2],
-    ['حلاقة شعر + دقن', 40, 3],
-    ['استشوار ومكواة', 20, 4],
-    ['صبغ شعر', 60, 5],
-    ['غسيل وجه', 15, 6],
-    ['عناية كاملة (شعر + دقن + غسيل)', 50, 7],
-  ];
+  // Delete old combos
+  await s.from('services').delete().in('name', [
+    'حلاقة شعر + دقن',
+    'عناية كاملة (شعر + دقن + غسيل)',
+  ]);
 
   const shopId = '718db02b-02cf-4754-bafa-b7dedb841e9b';
 
-  for (const [name, duration, sort] of services) {
-    const { error } = await s.from('services').insert({
-      shop_id: shopId,
-      name,
-      duration_minutes: duration,
-      sort_order: sort,
-    });
-    if (error) {
-      console.error('ERR:', name, error.message);
+  // Upsert each service (insert or update by name+shop)
+  const services = [
+    ['حلاقة شعر', 15, 1, '✂️'],
+    ['حلاقة دقن', 8, 2, '🪒'],
+    ['استشوار ومكواة', 10, 3, '💨'],
+    ['صبغ شعر', 30, 4, '🎨'],
+    ['غسيل وجه', 8, 5, '🧼'],
+  ];
+
+  for (const [name, duration, sort, icon] of services) {
+    // Check if exists
+    const { data: existing } = await s.from('services').select('id').eq('shop_id', shopId).eq('name', name).maybeSingle();
+    if (existing) {
+      const { error } = await s.from('services').update({ duration_minutes: duration, sort_order: sort }).eq('id', existing.id);
+      if (error) console.error('UPDATE ERR:', name, error.message);
+      else console.log('UPDATED:', name, `(${duration}min)`);
     } else {
-      console.log('OK:', name);
+      const { error } = await s.from('services').insert({ shop_id: shopId, name, duration_minutes: duration, sort_order: sort });
+      if (error) console.error('INSERT ERR:', name, error.message);
+      else console.log('INSERTED:', name, `(${duration}min)`);
     }
   }
+
   console.log('DONE');
 }
 

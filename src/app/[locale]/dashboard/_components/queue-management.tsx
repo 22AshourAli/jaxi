@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { QueueList } from "@/components/dashboard/queue-list";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -9,8 +9,13 @@ import { sendTurnNotification } from "@/actions/notifications";
 import { serverCallNext, serverComplete, serverNoShow, serverAddCustomer, serverDeleteEntry } from "@/actions/queue";
 import { phoneLink, whatsappLink, formatPhoneDisplay } from "@/lib/phone";
 import { PhoneDisplay } from "@/components/shared/phone-display";
-import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User, Trash2, MessageCircle, ChevronDown, History } from "lucide-react";
+import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User, Trash2, MessageCircle, ChevronDown, History, Scissors } from "lucide-react";
 import { QueueSkeleton, StatsSkeleton, Skeleton } from "@/components/shared/skeleton";
+
+function getServiceNames(entry: QueueEntry, map: Map<string, string>): string {
+  const ids = entry.service_ids ? entry.service_ids.split(",").filter(Boolean) : entry.service_id ? [entry.service_id] : [];
+  return ids.map((id) => map.get(id) || "").filter(Boolean).join(" + ");
+}
 
 type Service = {
   id: string;
@@ -28,6 +33,7 @@ type QueueEntry = {
   created_at: string;
   called_at: string | null;
   service_id: string | null;
+  service_ids?: string | null;
   service_name?: string;
 };
 
@@ -40,12 +46,13 @@ export function QueueManagement({ locale, dict }: Props) {
   const [shopName, setShopName] = useState("");
   const [shopId, setShopId] = useState<string | null>(null);
   const [services, setServices] = useState<Map<string, string>>(new Map());
+  const servicesRef = useRef<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [addName, setAddName] = useState("");
   const [addPhone, setAddPhone] = useState("");
-  const [addService, setAddService] = useState<string | null>(null);
+  const [addServices, setAddServices] = useState<string[]>([] as string[]);
   const [addError, setAddError] = useState("");
   const [addLoading, setAddLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"waiting" | "completed">("waiting");
@@ -75,6 +82,7 @@ export function QueueManagement({ locale, dict }: Props) {
           svcMap.set(svc.id, svc.name);
         }
         setServices(svcMap);
+        servicesRef.current = svcMap;
       }
 
       if (shopRes.data) {
@@ -89,7 +97,7 @@ export function QueueManagement({ locale, dict }: Props) {
         if (data) {
           const entries = (data as QueueEntry[]).map((e) => ({
             ...e,
-            service_name: svcMap.get(e.service_id ?? "") || "",
+            service_name: getServiceNames(e, svcMap),
           }));
           setEntries(entries);
           const currentServing = entries.find((e) => e.status === "serving");
@@ -129,7 +137,7 @@ export function QueueManagement({ locale, dict }: Props) {
               if (data) {
                 const entries = (data as QueueEntry[]).map((e) => ({
                   ...e,
-                  service_name: services.get(e.service_id ?? "") || "",
+                  service_name: getServiceNames(e, servicesRef.current),
                 }));
                 setEntries(entries);
                 const currentServing = entries.find((e) => e.status === "serving");
@@ -200,7 +208,7 @@ export function QueueManagement({ locale, dict }: Props) {
     if (data) {
       const mapped = (data as any[]).map((e: any) => ({
         ...e,
-        service_name: services.get(e.service_id ?? "") || "",
+        service_name: getServiceNames(e, services),
       }));
       setHistoryEntries(mapped);
     }
@@ -226,7 +234,7 @@ export function QueueManagement({ locale, dict }: Props) {
     setAddLoading(true);
     setAddError("");
 
-    const { error } = await serverAddCustomer(shopId!, addName.trim(), addPhone, addService);
+    const { error } = await serverAddCustomer(shopId!, addName.trim(), addPhone, addServices);
 
     if (error) {
       if (error.includes("customer_name")) {
@@ -245,7 +253,7 @@ export function QueueManagement({ locale, dict }: Props) {
     setShowAddModal(false);
     setAddName("");
     setAddPhone("");
-    setAddService(null);
+    setAddServices([]);
     setAddLoading(false);
   }
 
@@ -600,16 +608,16 @@ export function QueueManagement({ locale, dict }: Props) {
               {/* Service selection */}
               <div>
                 <label className="block mb-1.5 text-xs font-medium text-muted-foreground">
-                  {locale === "ar" ? "الخدمة" : "Service"}
+                  {locale === "ar" ? "الخدمات" : "Services"}
                 </label>
                 <div className="grid grid-cols-2 gap-1.5">
                   {Array.from(services).map(([id, name]) => (
                     <button
                       key={id}
                       type="button"
-                      onClick={() => setAddService(id)}
+                      onClick={() => setAddServices((prev) => prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id])}
                       className={`rounded-lg border px-2.5 py-2 text-xs font-medium transition ${
-                        addService === id
+                        addServices.includes(id)
                           ? "border-primary bg-primary/5 text-primary"
                           : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
                       }`}

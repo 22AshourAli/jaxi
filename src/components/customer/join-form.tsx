@@ -63,8 +63,8 @@ export function JoinForm({ locale, dict }: Props) {
   // Services
   const [services, setServices] = useState<any[]>([]);
   const [servicesMap, setServicesMap] = useState<Map<string, any>>(new Map());
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [selectedServiceName, setSelectedServiceName] = useState("");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [selectedServiceNames, setSelectedServiceNames] = useState("");
   const [serviceError, setServiceError] = useState("");
 
   const turnNotified = useRef(false);
@@ -293,12 +293,12 @@ export function JoinForm({ locale, dict }: Props) {
     const pErr = validatePhone(phone);
     setNameError(nErr);
     setPhoneError(pErr);
-    if (!selectedService) {
-      setServiceError(locale === "ar" ? "اختر الخدمة المطلوبة" : "Please select a service");
+    if (selectedServices.length === 0) {
+      setServiceError(locale === "ar" ? "اختر خدمة واحدة على الأقل" : "Select at least one service");
     } else {
       setServiceError("");
     }
-    if (nErr || pErr || !selectedService) return;
+    if (nErr || pErr || selectedServices.length === 0) return;
 
     setLoading(true);
     try {
@@ -318,7 +318,8 @@ export function JoinForm({ locale, dict }: Props) {
 
       setShopName(shop.name);
       setShopId(shop.id);
-      setSelectedServiceName(servicesMap.get(selectedService!)?.name || "");
+      const names = selectedServices.map((id) => servicesMap.get(id)?.name || "").filter(Boolean);
+      setSelectedServiceNames(names.join(locale === "ar" ? " + " : " + "));
 
       // Check if this phone already has an active booking
       const cleanPhone = phone.replace(/\D/g, "");
@@ -357,7 +358,8 @@ export function JoinForm({ locale, dict }: Props) {
       const { data: entry, error: insertErr } = await (supabase.from("queue_entries") as any)
         .insert({
           shop_id: shop.id,
-          service_id: selectedService,
+          service_id: selectedServices[0],
+          service_ids: selectedServices.join(","),
           ticket_number: nextNumber,
           customer_name: name.trim(),
           customer_phone: phone.replace(/\D/g, ""),
@@ -554,8 +556,8 @@ export function JoinForm({ locale, dict }: Props) {
           </div>
           <p className="text-xs font-medium text-muted-foreground">{dict.customer.yourNumber}</p>
           <p className="mt-1 text-6xl font-bold tracking-tight text-primary">#{ticketNumber}</p>
-          {selectedServiceName && (
-            <p className="mt-1.5 text-sm font-medium text-primary/70">{selectedServiceName}</p>
+          {selectedServiceNames && (
+            <p className="mt-1.5 text-sm font-medium text-primary/70">{selectedServiceNames}</p>
           )}
         </div>
 
@@ -700,19 +702,24 @@ export function JoinForm({ locale, dict }: Props) {
           </div>
         )}
 
-        {/* Service selection - simplified */}
+        {/* Service selection - multi-select */}
         <div className="space-y-2">
           <p className="text-sm font-medium text-foreground/80">
-            {locale === "ar" ? "الخدمة" : "Service"}
+            {locale === "ar" ? "اختر الخدمات" : "Select Services"}
           </p>
           <div className="space-y-1.5">
             {services.map((svc) => {
-              const isSelected = selectedService === svc.id;
+              const isSelected = selectedServices.includes(svc.id);
               return (
                 <button
                   key={svc.id}
                   type="button"
-                  onClick={() => { setSelectedService(svc.id); setServiceError(""); }}
+                  onClick={() => {
+                    setSelectedServices((prev) =>
+                      prev.includes(svc.id) ? prev.filter((id) => id !== svc.id) : [...prev, svc.id]
+                    );
+                    setServiceError("");
+                  }}
                   className={`w-full flex items-center gap-3 rounded-xl border px-4 py-3 text-right transition-all active:scale-[0.99] ${
                     isSelected
                       ? "border-primary bg-primary/5 shadow-sm"
@@ -730,13 +737,19 @@ export function JoinForm({ locale, dict }: Props) {
                     </p>
                     <p className="text-xs text-muted-foreground">{svc.duration_minutes} {locale === "ar" ? "دقيقة" : "min"}</p>
                   </div>
-                  {isSelected && (
-                    <CheckCircle className="h-5 w-5 shrink-0 text-primary" />
-                  )}
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${
+                    isSelected ? "border-primary bg-primary text-white" : "border-muted-foreground/30"
+                  }`}>
+                    {isSelected && <CheckCircle className="h-3.5 w-3.5" />}
+                  </span>
                 </button>
               );
             })}
           </div>
+          {selectedServices.length > 0 && <p className="px-1 text-xs text-muted-foreground">
+            {locale === "ar" ? `الوقت التقريبي: ` : "Est. time: "}
+            {services.filter((s) => selectedServices.includes(s.id)).reduce((t, s) => t + s.duration_minutes, 0)} {locale === "ar" ? "دقيقة" : "min"}
+          </p>}
           {serviceError && <p className="px-1 text-xs text-destructive font-medium">{serviceError}</p>}
         </div>
 

@@ -1,12 +1,15 @@
 export function formatPhoneDisplay(phone: string): string {
   const digits = phone.replace(/\D/g, "");
+  let formatted: string;
   if (digits.length === 11) {
-    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+    formatted = `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+  } else if (digits.length === 10) {
+    formatted = `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+  } else {
+    formatted = digits;
   }
-  if (digits.length === 10) {
-    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
-  }
-  return digits;
+  // LRM forces left-to-right rendering in RTL context
+  return `\u200E${formatted}\u200E`;
 }
 
 export function phoneLink(phone: string): string {
