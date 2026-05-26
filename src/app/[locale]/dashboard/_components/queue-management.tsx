@@ -6,8 +6,10 @@ import { QueueList } from "@/components/dashboard/queue-list";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { createClient } from "@/lib/supabase/client";
 import { sendTurnNotification } from "@/actions/notifications";
-import { serverCallNext, serverComplete, serverNoShow, serverAddCustomer } from "@/actions/queue";
-import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User } from "lucide-react";
+import { serverCallNext, serverComplete, serverNoShow, serverAddCustomer, serverDeleteEntry } from "@/actions/queue";
+import { phoneLink, whatsappLink } from "@/lib/phone";
+import { PhoneDisplay } from "@/components/shared/phone-display";
+import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User, Trash2, MessageCircle, ChevronDown } from "lucide-react";
 import { QueueSkeleton, StatsSkeleton, Skeleton } from "@/components/shared/skeleton";
 
 type QueueEntry = {
@@ -36,6 +38,7 @@ export function QueueManagement({ locale, dict }: Props) {
   const [addPhone, setAddPhone] = useState("");
   const [addError, setAddError] = useState("");
   const [addLoading, setAddLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"waiting" | "completed">("waiting");
   const isRtl = locale === "ar";
 
   useEffect(() => {
@@ -132,6 +135,10 @@ export function QueueManagement({ locale, dict }: Props) {
 
   async function handleNoShow(id: string) {
     await serverNoShow(id);
+  }
+
+  async function handleDelete(id: string) {
+    await serverDeleteEntry(id);
   }
 
   const addDigits = (v: string) => v.replace(/\D/g, "");
@@ -288,12 +295,102 @@ export function QueueManagement({ locale, dict }: Props) {
                 </div>
               </div>
 
-              <QueueList
-                entries={waiting}
-                dict={dict}
-                onComplete={handleComplete}
-                onNoShow={handleNoShow}
-              />
+              <div className="flex gap-2 border-b border-border">
+                <button
+                  onClick={() => setActiveTab("waiting")}
+                  className={`pb-3 text-sm font-medium transition border-b-2 -mb-[1px] ${
+                    activeTab === "waiting"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {locale === "ar" ? "في الانتظار" : "Waiting"} ({waiting.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab("completed")}
+                  className={`pb-3 text-sm font-medium transition border-b-2 -mb-[1px] ${
+                    activeTab === "completed"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {locale === "ar" ? "تم الانتهاء" : "Completed"} ({entries.filter((e) => e.status === "completed").length})
+                </button>
+              </div>
+
+              {activeTab === "waiting" ? (
+                <QueueList
+                  entries={waiting}
+                  dict={dict}
+                  onComplete={handleComplete}
+                  onNoShow={handleNoShow}
+                />
+              ) : (
+                <div className="space-y-2">
+                  {(() => {
+                    const completed = entries.filter((e) => e.status === "completed");
+                    if (completed.length === 0) {
+                      return (
+                        <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center">
+                          <UserCheck className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
+                          <p className="text-muted-foreground">{locale === "ar" ? "لا يوجد عملاء منتهيون اليوم" : "No completed customers today"}</p>
+                        </div>
+                      );
+                    }
+                    return completed.map((entry, i) => (
+                      <div
+                        key={entry.id}
+                        className="animate-slide-up flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                        style={{ animationDelay: `${i * 40}ms`, animationFillMode: "backwards" }}
+                      >
+                        <div className="flex items-center gap-4 min-w-0">
+                          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-success/10 text-lg font-bold text-success shadow-sm">
+                            #{entry.ticket_number}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">{entry.customer_name || `#${entry.ticket_number}`}</p>
+                            {entry.customer_phone && (
+                              <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                                <Phone className="h-3 w-3 shrink-0" />
+                                <PhoneDisplay phone={entry.customer_phone} />
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-1.5 shrink-0">
+                          {entry.customer_phone && (
+                            <>
+                              <a
+                                href={phoneLink(entry.customer_phone)}
+                                className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted active:scale-95"
+                                title={locale === "ar" ? "اتصال" : "Call"}
+                              >
+                                <Phone className="h-3.5 w-3.5" />
+                              </a>
+                              <a
+                                href={whatsappLink(entry.customer_phone)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs font-medium text-success transition hover:bg-success/10 active:scale-95"
+                                title="WhatsApp"
+                              >
+                                <MessageCircle className="h-3.5 w-3.5" />
+                              </a>
+                            </>
+                          )}
+                          <button
+                            onClick={() => handleDelete(entry.id)}
+                            className="flex items-center gap-1 rounded-xl border border-destructive/30 px-3 py-2 text-xs font-medium text-destructive transition hover:bg-destructive/10 active:scale-95"
+                            title={locale === "ar" ? "حذف" : "Delete"}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              )}
             </>
           )}
         </div>

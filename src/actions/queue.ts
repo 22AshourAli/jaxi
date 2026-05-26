@@ -20,6 +20,12 @@ export async function serverNoShow(entryId: string) {
   await (supabase.from("queue_entries") as any).update({ status: "no_show" }).eq("id", entryId);
 }
 
+export async function serverDeleteEntry(entryId: string) {
+  const supabase = await createAdminSupabase();
+  const { error } = await (supabase.from("queue_entries") as any).delete().eq("id", entryId);
+  return { error: error?.message ?? null };
+}
+
 export async function serverAddCustomer(shopId: string, name: string, phone: string) {
   const supabase = await createAdminSupabase();
   const { data: last } = await (supabase.from("queue_entries") as any)

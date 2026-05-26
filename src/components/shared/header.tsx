@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import { Menu, X, Globe, Scissors } from "lucide-react";
+import { Logo } from "@/components/shared/logo";
+import { Menu, X, Globe } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
@@ -23,12 +24,9 @@ export function Header({ locale, dict, hideLocale }: Props) {
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
         <Link
           href={`/${locale}`}
-          className="flex items-center gap-2 text-lg font-bold tracking-tight transition hover:opacity-80"
+          className="flex items-center transition hover:opacity-80"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/25">
-            <Scissors className="h-4 w-4 text-white" />
-          </span>
-          {dict.site.title}
+          <Logo size="sm" />
         </Link>
 
         <nav className="hidden items-center gap-2 sm:flex">

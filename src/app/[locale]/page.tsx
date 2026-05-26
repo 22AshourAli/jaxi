@@ -4,6 +4,7 @@ import { isValidLocale } from "@/lib/i18n/config";
 import { notFound } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { Header } from "@/components/shared/header";
+import { Logo } from "@/components/shared/logo";
 import { LandingQueueStatus } from "@/components/landing/queue-status";
 import {
   Scissors,
@@ -11,13 +12,11 @@ import {
   Sparkles,
   Timer,
   Phone,
-  Mail,
   MapPin,
   Star,
   Shield,
   Zap,
   HeartHandshake,
-  Quote,
 } from "lucide-react";
 
 const DAYS = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"] as const;
@@ -62,38 +61,43 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       <Header locale={locale} dict={dict} />
 
       {/* ═══ HERO ═══ */}
-      <section className="relative flex flex-col items-center justify-center overflow-hidden px-4 pb-20 pt-24 sm:pt-32">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--primary)_0%,transparent_60%)] opacity-[0.08]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,var(--accent)_0%,transparent_50%)] opacity-[0.05]" />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_60%,transparent_110%)]" />
+      <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4">
+        {/* Video background */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="https://images.unsplash.com/photo-1585747861115-bb9eef06b30c?w=1600&q=80"
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src="https://videos.pexels.com/video-files/8867395/8867395-uhd_2732_1440_25fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/7697121/7697121-uhd_2732_1440_25fps.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/95" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_60%)] opacity-20" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_60%,transparent_110%)]" />
 
         {/* Floating orbs */}
-        <div className="pointer-events-none absolute left-1/4 top-1/4 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
-        <div className="pointer-events-none absolute right-1/4 top-1/3 h-48 w-48 rounded-full bg-accent/5 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/4 top-1/4 h-80 w-80 rounded-full bg-primary/10 blur-3xl animate-float" />
+        <div className="pointer-events-none absolute right-1/4 top-1/3 h-64 w-64 rounded-full bg-accent/10 blur-3xl animate-float" style={{ animationDelay: "-1.5s", animationDuration: "4s" }} />
 
         <div className="relative mx-auto max-w-3xl text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-[2rem] bg-gradient-to-br from-primary to-accent shadow-2xl shadow-primary/30 ring-[6px] ring-background [animation:bounce-in_0.6s_ease-out]">
-            <Scissors className="h-9 w-9 sm:h-10 sm:w-10 text-white" />
+          <div className="mx-auto mb-6 [animation:bounce-in_0.7s_ease-out]">
+            <Logo size="xl" />
           </div>
 
-          <h1 className="[animation:slide-up_0.5s_ease-out] bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
-            {shop?.name || dict.site.title}
-          </h1>
-
-          <p
-            className="mx-auto mt-4 max-w-lg text-base sm:text-lg text-muted-foreground [animation:slide-up_0.5s_ease-out_0.1s_both]"
-          >
+          <p className="mx-auto mt-2 max-w-xl text-base sm:text-lg text-foreground/80 [animation:slide-up_0.6s_ease-out_0.15s_both] leading-relaxed">
             {isRtl
               ? "أفضل مكان للحصول على إطلالتك المثالية. حلاقة عصرية، عناية باللحية، وخدمة راقية"
               : "The best place for your perfect look. Modern haircuts, beard grooming, and premium service."}
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row [animation:slide-up_0.5s_ease-out_0.2s_both]">
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row [animation:slide-up_0.6s_ease-out_0.25s_both]">
             <Link
               href={`/${locale}/join`}
-              className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
+              className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-accent px-8 py-4 text-base font-semibold text-white shadow-2xl shadow-primary/30 transition-all hover:shadow-2xl hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-[0.98] btn-shine"
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               <Sparkles className="h-5 w-5" />
               {dict.customer.getTicket}
               <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${isRtl ? "rotate-180 group-hover:-translate-x-1" : ""}`} />
@@ -101,9 +105,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           </div>
         </div>
 
-        {/* Live queue status */}
         {shop && (
-          <div className="relative mt-12 w-full max-w-lg px-4 [animation:slide-up_0.5s_ease-out_0.3s_both]">
+          <div className="relative mt-14 w-full max-w-lg px-4 [animation:slide-up_0.6s_ease-out_0.35s_both]">
             <LandingQueueStatus shopId={shop.id} avgServiceTime={shop.avg_service_time || 20} locale={locale} dict={dict} />
           </div>
         )}
@@ -253,16 +256,15 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <div className="flex items-center justify-center gap-3 rounded-xl border border-border bg-card/50 px-5 py-4 backdrop-blur-sm">
               <MapPin className="h-5 w-5 text-primary shrink-0" />
               <span className="text-sm text-muted-foreground">
-                📍 {isRtl ? "الناصرية" : "Naseriya"}
+                {isRtl ? "الناصرية" : "Naseriya"}
               </span>
             </div>
           </div>
 
-          {/* CTA */}
           <div className="mt-10">
             <Link
               href={`/${locale}/join`}
-              className="group inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-primary to-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
+              className="group inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-primary to-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98] btn-shine"
             >
               <Sparkles className="h-5 w-5" />
               {dict.customer.getTicket}
@@ -273,14 +275,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       </section>
 
       {/* ═══ FOOTER ═══ */}
-      <footer className="border-t border-border py-10 text-center text-sm text-muted-foreground">
+      <footer className="border-t border-border py-12 text-center text-sm text-muted-foreground">
         <div className="mx-auto max-w-5xl px-4">
-          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/25">
-            <Scissors className="h-5 w-5 text-white" />
+          <div className="mb-5">
+            <Logo size="md" />
           </div>
-          <p className="font-bold text-foreground">{shop?.name || dict.site.title}</p>
           <p className="mt-1">+20 109 402 2327</p>
-          <p className="mt-4 text-xs">&copy; {new Date().getFullYear()} {dict.site.title}. {isRtl ? "جميع الحقوق محفوظة" : "All rights reserved"}</p>
+          <p className="mt-4 text-xs">&copy; {new Date().getFullYear()} {shop?.name || dict.site.title}. {isRtl ? "جميع الحقوق محفوظة" : "All rights reserved"}</p>
         </div>
       </footer>
     </div>

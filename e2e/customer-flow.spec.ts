@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Customer Flow", () => {
   test("landing page loads and shows hero", async ({ page }) => {
     await page.goto("/en");
-    await expect(page.getByText("Dawrk").first()).toBeVisible();
+    await expect(page.getByText("جاكسي").first()).toBeVisible();
     await expect(page.getByText(/perfect look|best place/i)).toBeVisible();
     await expect(page.getByRole("link", { name: /book now/i }).first()).toBeVisible();
   });
@@ -12,7 +12,7 @@ test.describe("Customer Flow", () => {
     await page.goto("/en");
     await page.getByRole("link", { name: /book now/i }).first().click();
     await page.waitForURL("/en/join");
-    await expect(page.getByRole("heading", { name: /take your turn/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /book your spot/i })).toBeVisible();
   });
 
   test("join page shows form with name and phone", async ({ page }) => {

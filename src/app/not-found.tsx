@@ -4,6 +4,7 @@ import { match } from "@formatjs/intl-localematcher";
 import Negotiator from "negotiator";
 import { locales, defaultLocale } from "@/lib/i18n/config";
 import { Scissors } from "lucide-react";
+import { Logo } from "@/components/shared/logo";
 
 async function getLocale(): Promise<"ar" | "en"> {
   const cookieStore = await cookies();
@@ -32,9 +33,7 @@ export default async function NotFound() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_60%)] opacity-[0.05]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_60%,transparent_110%)]" />
 
-      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-gradient-to-br from-primary to-accent shadow-2xl shadow-primary/30 ring-[6px] ring-background">
-        <Scissors className="h-9 w-9 text-white" />
-      </div>
+      <Logo size="xl" showText={false} />
 
       <h1 className="text-8xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
         404

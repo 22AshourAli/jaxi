@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { LayoutDashboard, BarChart3, Settings, LogOut, ChevronLeft, Globe, Scissors } from "lucide-react";
+import { LayoutDashboard, BarChart3, Settings, LogOut, ChevronLeft, Globe } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { Logo } from "@/components/shared/logo";
 
 type Props = {
   locale: string;
@@ -42,11 +43,8 @@ export function DashboardHeader({ locale, dict }: Props) {
           >
             <LayoutDashboard className="h-5 w-5" />
           </button>
-          <Link href={`/${locale}`} className="flex items-center gap-2 text-lg font-bold tracking-tight">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Scissors className="h-4 w-4" />
-            </span>
-            {dict.site.title}
+          <Link href={`/${locale}`}>
+            <Logo size="sm" />
           </Link>
           <button
             onClick={handleLogout}
@@ -74,11 +72,8 @@ export function DashboardHeader({ locale, dict }: Props) {
         dir={isRtl ? "rtl" : "ltr"}
       >
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
-          <Link href={`/${locale}`} className="flex items-center gap-2 text-lg font-bold tracking-tight">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-white">
-              <Scissors className="h-4 w-4" />
-            </span>
-            {dict.site.title}
+          <Link href={`/${locale}`}>
+            <Logo size="sm" />
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}

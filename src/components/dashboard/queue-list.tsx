@@ -1,6 +1,7 @@
 "use client";
 
 import { Phone, Check, X, Clock } from "lucide-react";
+import { PhoneDisplay } from "@/components/shared/phone-display";
 
 type QueueEntry = {
   id: string;
@@ -61,8 +62,8 @@ export function QueueList({ entries, dict, onComplete, onNoShow }: Props) {
               </p>
               {entry.customer_phone && (
                 <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                  <Phone className="h-3 w-3" />
-                  {entry.customer_phone}
+                  <Phone className="h-3 w-3 shrink-0" />
+                  <PhoneDisplay phone={entry.customer_phone} />
                 </p>
               )}
             </div>

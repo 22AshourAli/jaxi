@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "الحلاق - Barber",
-    short_name: "الحلاق",
-    description: "حجز دورك في صالون الحلاقة",
+    name: "جاكسي",
+    short_name: "جاكسي",
+    description: "حجز دورك في صالون الحلاقة - جاكسي",
     start_url: "/ar",
     display: "standalone",
     background_color: "#ffffff",

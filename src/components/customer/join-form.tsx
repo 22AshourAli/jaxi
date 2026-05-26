@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useNotification } from "@/hooks/use-notification";
 import { useToast } from "@/components/shared/toast";
+import { Logo } from "@/components/shared/logo";
 import {
   Loader2,
   User,
   Phone,
-  Scissors,
   ArrowRight,
   CheckCircle,
   AlertCircle,
@@ -62,8 +62,24 @@ export function JoinForm({ locale, dict }: Props) {
   const [queueAvailable, setQueueAvailable] = useState(true);
   const [whatsappSent, setWhatsappSent] = useState(false);
 
+  // Services
+  const [services, setServices] = useState<any[]>([]);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [serviceError, setServiceError] = useState("");
+
   const turnNotified = useRef(false);
   const nearNotified = useRef(false);
+
+  // Fetch services on mount
+  useEffect(() => {
+    supabase
+      .from("services")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        if (data) setServices(data as any[]);
+      });
+  }, []);
 
   // Recover from localStorage on mount
   useEffect(() => {
@@ -263,7 +279,12 @@ export function JoinForm({ locale, dict }: Props) {
     const pErr = validatePhone(phone);
     setNameError(nErr);
     setPhoneError(pErr);
-    if (nErr || pErr) return;
+    if (!selectedService) {
+      setServiceError(locale === "ar" ? "اختر الخدمة المطلوبة" : "Please select a service");
+    } else {
+      setServiceError("");
+    }
+    if (nErr || pErr || !selectedService) return;
 
     setLoading(true);
     try {
@@ -321,6 +342,7 @@ export function JoinForm({ locale, dict }: Props) {
       const { data: entry, error: insertErr } = await (supabase.from("queue_entries") as any)
         .insert({
           shop_id: shop.id,
+          service_id: selectedService,
           ticket_number: nextNumber,
           customer_name: name.trim(),
           customer_phone: phone.replace(/\D/g, ""),
@@ -512,8 +534,8 @@ export function JoinForm({ locale, dict }: Props) {
         </div>
 
         <div className="text-center animate-scale-in">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20">
-            <Scissors className="h-7 w-7 text-primary" />
+          <div className="mx-auto mb-3">
+            <Logo size="md" showText={false} />
           </div>
           <p className="text-xs font-medium text-muted-foreground">{dict.customer.yourNumber}</p>
           <p className="mt-1 text-6xl font-bold tracking-tight text-primary">#{ticketNumber}</p>
@@ -639,99 +661,151 @@ export function JoinForm({ locale, dict }: Props) {
 
   // ── FORM ──
   return (
-    <div className="w-full max-w-md space-y-6 py-8 px-4">
-      <div className="text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent shadow-xl shadow-primary/30 animate-scale-in">
-          <Scissors className="h-8 w-8 text-white" />
+    <div className="w-full max-w-md mx-auto py-8 px-4">
+      <div className="text-center mb-8 animate-fade-in">
+        <div className="animate-float mb-5">
+          <Logo size="lg" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight">
           {locale === "ar" ? "احجز مكانك" : "Book Your Spot"}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {locale === "ar" ? "أدخل بياناتك واحجز مكانك" : "Enter your info to book your spot"}
+        <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
+          {locale === "ar" ? "اختر الخدمة وأدخل بياناتك للحجز" : "Choose a service and enter your details"}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-lg animate-slide-up">
+      <form onSubmit={handleSubmit} className="space-y-6 animate-slide-up">
         {generalError && (
-          <div className="flex items-start gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-destructive animate-scale-in">
+          <div className="flex items-start gap-3 rounded-xl bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive animate-shake">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{generalError}</span>
+            <span className="leading-relaxed">{generalError}</span>
           </div>
         )}
 
-        <div className="space-y-1.5">
-          <label htmlFor="name" className="text-sm font-medium">
-            {locale === "ar" ? "الاسم" : "Name"}
-          </label>
-          <div
-            className={`flex items-center gap-3 rounded-xl border bg-background px-4 py-3.5 shadow-sm transition-all focus-within:border-primary focus-within:ring-[3px] focus-within:ring-primary/10 ${
-              nameError ? "border-destructive/70 focus-within:border-destructive focus-within:ring-destructive/10" : "border-border"
-            }`}
-          >
-            <User className={`h-4 w-4 shrink-0 ${nameError ? "text-destructive" : "text-muted-foreground"}`} />
-            <input
-              id="name"
-              type="text"
-              placeholder={locale === "ar" ? "محمد أحمد" : "John Doe"}
-              value={name}
-              onChange={(e) => { setName(e.target.value); setNameError(""); setGeneralError(""); }}
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
-              dir={isRtl ? "rtl" : "ltr"}
-              autoComplete="name"
-              autoFocus
-            />
+        {/* Service selection */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-foreground/80">
+            {locale === "ar" ? "اختر الخدمة" : "Choose Service"}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {services.map((svc) => {
+              const isSelected = selectedService === svc.id;
+              const Icon = getServiceIcon(svc.name);
+              return (
+                <button
+                  key={svc.id}
+                  type="button"
+                  onClick={() => { setSelectedService(svc.id); setServiceError(""); }}
+                  className={`relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all active:scale-[0.97] ${
+                    isSelected
+                      ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
+                      : "border-border bg-card hover:border-primary/30 hover:shadow-sm"
+                  }`}
+                >
+                  {isSelected && (
+                    <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    </span>
+                  )}
+                  <span className={`text-2xl ${isSelected ? "text-primary" : "text-muted-foreground"}`}>
+                    {Icon}
+                  </span>
+                  <span className={`text-xs font-medium leading-tight ${isSelected ? "text-primary" : "text-foreground"}`}>
+                    {svc.name}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {svc.duration_minutes} {locale === "ar" ? "دقيقة" : "min"}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-          {nameError && (
-            <p className="px-1 text-xs text-destructive animate-fade-in">{nameError}</p>
-          )}
+          {serviceError && <p className="px-1 text-xs text-destructive font-medium animate-shake">{serviceError}</p>}
         </div>
 
-        <div className="space-y-1.5">
-          <label htmlFor="phone" className="text-sm font-medium">
-            {locale === "ar" ? "رقم الجوال (واتساب)" : "Phone Number (WhatsApp)"}
-          </label>
-          <div
-            className={`flex items-center gap-3 rounded-xl border-2 bg-background px-4 py-3.5 shadow-sm transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 ${
-              phoneError ? "border-destructive/70 focus-within:border-destructive focus-within:ring-destructive/20" : "border-border"
-            }`}
-          >
-            <Phone className={`h-4 w-4 shrink-0 ${phoneError ? "text-destructive" : "text-muted-foreground"}`} />
-            <input
-              id="phone"
-              type="tel"
-              placeholder="01X XXX XXXX"
-              value={phone}
-              onChange={(e) => { setPhone(formatPhone(e.target.value)); setPhoneError(""); setGeneralError(""); }}
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
-              dir="ltr"
-              autoComplete="tel"
-            />
+        <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm space-y-4">
+          {/* Name field */}
+          <div className="space-y-1.5">
+            <label htmlFor="name" className="text-sm font-medium text-foreground/80">
+              {locale === "ar" ? "الاسم" : "Name"}
+            </label>
+            <div
+              className={`flex items-center gap-3 rounded-xl border bg-background px-4 py-3 shadow-sm transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 ${
+                nameError ? "border-destructive/50 focus-within:border-destructive focus-within:ring-destructive/10" : "border-border"
+              }`}
+            >
+              <User className={`h-4 w-4 shrink-0 ${nameError ? "text-destructive" : "text-muted-foreground"}`} />
+              <input
+                id="name"
+                type="text"
+                placeholder={locale === "ar" ? "محمد أحمد" : "John Doe"}
+                value={name}
+                onChange={(e) => { setName(e.target.value); setNameError(""); setGeneralError(""); }}
+                className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
+                dir={isRtl ? "rtl" : "ltr"}
+                autoComplete="name"
+                autoFocus
+              />
+            </div>
+            {nameError && <p className="px-1 text-xs text-destructive font-medium animate-shake">{nameError}</p>}
           </div>
-          {phoneError && (
-            <p className="px-1 text-xs text-destructive animate-fade-in">{phoneError}</p>
-          )}
+
+          {/* Phone field */}
+          <div className="space-y-1.5">
+            <label htmlFor="phone" className="text-sm font-medium text-foreground/80">
+              {locale === "ar" ? "رقم الجوال (واتساب)" : "Phone Number (WhatsApp)"}
+            </label>
+            <div
+              className={`flex items-center gap-3 rounded-xl border bg-background px-4 py-3 shadow-sm transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 ${
+                phoneError ? "border-destructive/50 focus-within:border-destructive focus-within:ring-destructive/10" : "border-border"
+              }`}
+            >
+              <Phone className={`h-4 w-4 shrink-0 ${phoneError ? "text-destructive" : "text-muted-foreground"}`} />
+              <input
+                id="phone"
+                type="tel"
+                placeholder="01X XXX XXXX"
+                value={phone}
+                onChange={(e) => { setPhone(formatPhone(e.target.value)); setPhoneError(""); setGeneralError(""); }}
+                className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/40 tracking-wider"
+                dir="ltr"
+                autoComplete="tel"
+              />
+            </div>
+            {phoneError && <p className="px-1 text-xs text-destructive font-medium animate-shake">{phoneError}</p>}
+          </div>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-primary to-accent px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
+          className="btn-shine group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-primary to-accent px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0"
         >
-          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
           {loading ? (
-            <span className="inline-flex items-center gap-2">
+            <span className="inline-flex items-center gap-2.5">
               <Loader2 className="h-4 w-4 animate-spin" />
               {dict.common.loading}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-2">
+            <span className="inline-flex items-center gap-2.5">
               {locale === "ar" ? "احجز مكانك" : "Book Now"}
-              <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-0.5 ${isRtl ? "rotate-180 group-hover:-translate-x-0.5" : ""}`} />
+              <ArrowRight className={`h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 ${isRtl ? "rotate-180 group-hover:-translate-x-1" : ""}`} />
             </span>
           )}
         </button>
       </form>
     </div>
   );
+}
+
+function getServiceIcon(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes("شعر") && n.includes("دقن")) return "💈";
+  if (n.includes("شعر") || n.includes("hair")) return "✂️";
+  if (n.includes("دقن") || n.includes("beard") || n.includes("لحية")) return "🪒";
+  if (n.includes("استشوار") || n.includes("مكوا") || n.includes("blow")) return "💨";
+  if (n.includes("صبغ") || n.includes("color") || n.includes("لون")) return "🎨";
+  if (n.includes("غسيل") || n.includes("face") || n.includes("wash")) return "🧼";
+  if (n.includes("عناية") || n.includes("complete") || n.includes("package")) return "⭐";
+  return "✂️";
 }
