@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TicketTracker } from "@/components/customer/ticket-tracker";
 import { ToastProvider } from "@/components/shared/toast";
+import { AnimationsProvider } from "@/components/providers/animations-provider";
 import { isValidLocale } from "@/lib/i18n/config";
 
 export default async function LocaleLayout({
@@ -15,8 +16,10 @@ export default async function LocaleLayout({
   return (
     <ThemeProvider>
       <ToastProvider>
-        {children}
-        <TicketTracker locale={locale} />
+        <AnimationsProvider>
+          {children}
+          <TicketTracker locale={locale} />
+        </AnimationsProvider>
       </ToastProvider>
     </ThemeProvider>
   );

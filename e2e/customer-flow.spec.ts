@@ -12,7 +12,7 @@ test.describe("Customer Flow", () => {
     await page.goto("/en");
     await page.getByRole("link", { name: /book now/i }).first().click();
     await page.waitForURL("/en/join");
-    await expect(page.getByRole("heading", { name: /book your spot/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /book your turn/i })).toBeVisible();
   });
 
   test("join page shows form with name and phone", async ({ page }) => {

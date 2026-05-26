@@ -7,10 +7,17 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { createClient } from "@/lib/supabase/client";
 import { sendTurnNotification } from "@/actions/notifications";
 import { serverCallNext, serverComplete, serverNoShow, serverAddCustomer, serverDeleteEntry } from "@/actions/queue";
-import { phoneLink, whatsappLink } from "@/lib/phone";
+import { phoneLink, whatsappLink, formatPhoneDisplay } from "@/lib/phone";
 import { PhoneDisplay } from "@/components/shared/phone-display";
-import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User, Trash2, MessageCircle, ChevronDown } from "lucide-react";
+import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User, Trash2, MessageCircle, ChevronDown, History } from "lucide-react";
 import { QueueSkeleton, StatsSkeleton, Skeleton } from "@/components/shared/skeleton";
+
+type Service = {
+  id: string;
+  name: string;
+  duration_minutes: number;
+  sort_order: number;
+};
 
 type QueueEntry = {
   id: string;
@@ -21,6 +28,7 @@ type QueueEntry = {
   created_at: string;
   called_at: string | null;
   service_id: string | null;
+  service_name?: string;
 };
 
 type Props = { locale: string; dict: any };
@@ -31,14 +39,19 @@ export function QueueManagement({ locale, dict }: Props) {
   const [serving, setServing] = useState<QueueEntry | null>(null);
   const [shopName, setShopName] = useState("");
   const [shopId, setShopId] = useState<string | null>(null);
+  const [services, setServices] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [addName, setAddName] = useState("");
   const [addPhone, setAddPhone] = useState("");
+  const [addService, setAddService] = useState<string | null>(null);
   const [addError, setAddError] = useState("");
   const [addLoading, setAddLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"waiting" | "completed">("waiting");
+  const [showHistory, setShowHistory] = useState<string | null>(null);
+  const [historyEntries, setHistoryEntries] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const isRtl = locale === "ar";
 
   useEffect(() => {
@@ -52,6 +65,18 @@ export function QueueManagement({ locale, dict }: Props) {
         setShopName(shopRes.data.name);
       }
 
+      // Fetch services for mapping
+      const { data: svcData } = await (supabase.from("services") as any)
+        .select("id, name")
+        .order("sort_order", { ascending: true });
+      const svcMap = new Map<string, string>();
+      if (svcData) {
+        for (const svc of svcData as any[]) {
+          svcMap.set(svc.id, svc.name);
+        }
+        setServices(svcMap);
+      }
+
       if (shopRes.data) {
         const { data } = await supabase
           .from("queue_entries")
@@ -62,7 +87,10 @@ export function QueueManagement({ locale, dict }: Props) {
           .order("ticket_number", { ascending: true });
 
         if (data) {
-          const entries = data as QueueEntry[];
+          const entries = (data as QueueEntry[]).map((e) => ({
+            ...e,
+            service_name: svcMap.get(e.service_id ?? "") || "",
+          }));
           setEntries(entries);
           const currentServing = entries.find((e) => e.status === "serving");
           setServing(currentServing ?? null);
@@ -99,7 +127,10 @@ export function QueueManagement({ locale, dict }: Props) {
             .order("ticket_number", { ascending: true })
             .then(({ data }) => {
               if (data) {
-                const entries = data as QueueEntry[];
+                const entries = (data as QueueEntry[]).map((e) => ({
+                  ...e,
+                  service_name: services.get(e.service_id ?? "") || "",
+                }));
                 setEntries(entries);
                 const currentServing = entries.find((e) => e.status === "serving");
                 setServing(currentServing ?? null);
@@ -141,6 +172,41 @@ export function QueueManagement({ locale, dict }: Props) {
     await serverDeleteEntry(id);
   }
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "n" || e.key === "N") {
+        e.preventDefault();
+        handleCallNext();
+      }
+      if (e.key === "a" || e.key === "A") {
+        e.preventDefault();
+        setShowAddModal(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [waiting, serving, loading, actionLoading]);
+
+  async function handleShowHistory(phone: string) {
+    setShowHistory(phone);
+    setHistoryLoading(true);
+    const { data } = await (supabase.from("queue_entries") as any)
+      .select("*")
+      .eq("customer_phone", phone.replace(/\D/g, ""))
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (data) {
+      const mapped = (data as any[]).map((e: any) => ({
+        ...e,
+        service_name: services.get(e.service_id ?? "") || "",
+      }));
+      setHistoryEntries(mapped);
+    }
+    setHistoryLoading(false);
+  }
+
   const addDigits = (v: string) => v.replace(/\D/g, "");
 
   async function handleAddCustomer() {
@@ -160,7 +226,7 @@ export function QueueManagement({ locale, dict }: Props) {
     setAddLoading(true);
     setAddError("");
 
-    const { error } = await serverAddCustomer(shopId!, addName.trim(), addPhone);
+    const { error } = await serverAddCustomer(shopId!, addName.trim(), addPhone, addService);
 
     if (error) {
       if (error.includes("customer_name")) {
@@ -179,6 +245,7 @@ export function QueueManagement({ locale, dict }: Props) {
     setShowAddModal(false);
     setAddName("");
     setAddPhone("");
+    setAddService(null);
     setAddLoading(false);
   }
 
@@ -253,6 +320,9 @@ export function QueueManagement({ locale, dict }: Props) {
                       <p className="mt-0.5 text-3xl sm:text-4xl font-bold text-primary">#{serving.ticket_number}</p>
                       {serving.customer_name && (
                         <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground truncate">{serving.customer_name}</p>
+                      )}
+                      {serving.service_name && (
+                        <p className="text-[10px] text-primary/70 font-medium truncate">{serving.service_name}</p>
                       )}
                     </div>
                     <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10">
@@ -349,6 +419,9 @@ export function QueueManagement({ locale, dict }: Props) {
                           </span>
                           <div className="min-w-0">
                             <p className="font-medium truncate">{entry.customer_name || `#${entry.ticket_number}`}</p>
+                            {entry.service_name && (
+                              <p className="text-[10px] text-primary/60 font-medium truncate">{entry.service_name}</p>
+                            )}
                             {entry.customer_phone && (
                               <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                                 <Phone className="h-3 w-3 shrink-0" />
@@ -376,6 +449,13 @@ export function QueueManagement({ locale, dict }: Props) {
                               >
                                 <MessageCircle className="h-3.5 w-3.5" />
                               </a>
+                              <button
+                                onClick={() => handleShowHistory(entry.customer_phone!)}
+                                className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted active:scale-95"
+                                title={locale === "ar" ? "السجل" : "History"}
+                              >
+                                <History className="h-3.5 w-3.5" />
+                              </button>
                             </>
                           )}
                           <button
@@ -395,6 +475,68 @@ export function QueueManagement({ locale, dict }: Props) {
           )}
         </div>
       </main>
+
+      {/* ── History Modal ── */}
+      {showHistory && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
+          <div className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-xl animate-slide-up max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
+              <div className="flex items-center gap-2">
+                <History className="h-4 w-4 text-muted-foreground" />
+                <h2 className="text-base font-semibold">
+                  {locale === "ar" ? "تاريخ الزيارات" : "Visit History"}
+                </h2>
+                {showHistory && <span className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(showHistory)}</span>}
+              </div>
+              <button onClick={() => setShowHistory(null)} className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-muted transition">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-2">
+              {historyLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : historyEntries.length === 0 ? (
+                <div className="py-12 text-center">
+                  <p className="text-sm text-muted-foreground">{locale === "ar" ? "لا توجد زيارات سابقة" : "No previous visits"}</p>
+                </div>
+              ) : (
+                historyEntries.map((e: any, i: number) => (
+                  <div key={e.id} className="flex items-center justify-between rounded-xl border border-border bg-card/50 p-3.5" style={{ animationDelay: `${i * 30}ms` }}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${
+                        e.status === "completed" ? "bg-success/10 text-success" : e.status === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
+                      }`}>
+                        #{e.ticket_number}
+                      </span>
+                      <div className="min-w-0">
+                        {e.service_name && <p className="text-xs font-medium text-foreground truncate">{e.service_name}</p>}
+                        <p className="text-[10px] text-muted-foreground">
+                          {new Date(e.created_at).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                            day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                      e.status === "completed" ? "bg-success/10 text-success" :
+                      e.status === "cancelled" ? "bg-destructive/10 text-destructive" :
+                      e.status === "serving" ? "bg-primary/10 text-primary" :
+                      "bg-muted text-muted-foreground"
+                    }`}>
+                      {e.status === "completed" ? (locale === "ar" ? "تم" : "Done") :
+                       e.status === "cancelled" ? (locale === "ar" ? "ملغي" : "Cancelled") :
+                       e.status === "serving" ? (locale === "ar" ? "جارٍ" : "Serving") :
+                       e.status === "waiting" ? (locale === "ar" ? "انتظار" : "Waiting") : e.status}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Customer Modal */}
       {showAddModal && (
@@ -419,7 +561,7 @@ export function QueueManagement({ locale, dict }: Props) {
               <div className="mb-3 rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">{addError}</div>
             )}
 
-            <div className="space-y-3">
+              <div className="space-y-3">
               <div>
                 <label htmlFor="add-name" className="block mb-1 text-xs font-medium text-muted-foreground">
                   {locale === "ar" ? "الاسم" : "Name"}
@@ -453,6 +595,28 @@ export function QueueManagement({ locale, dict }: Props) {
                     placeholder="05X XXX XXXX"
                     dir="ltr"
                   />
+                </div>
+              </div>
+              {/* Service selection */}
+              <div>
+                <label className="block mb-1.5 text-xs font-medium text-muted-foreground">
+                  {locale === "ar" ? "الخدمة" : "Service"}
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {Array.from(services).map(([id, name]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setAddService(id)}
+                      className={`rounded-lg border px-2.5 py-2 text-xs font-medium transition ${
+                        addService === id
+                          ? "border-primary bg-primary/5 text-primary"
+                          : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                      }`}
+                    >
+                      {name}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

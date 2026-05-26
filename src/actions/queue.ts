@@ -26,7 +26,7 @@ export async function serverDeleteEntry(entryId: string) {
   return { error: error?.message ?? null };
 }
 
-export async function serverAddCustomer(shopId: string, name: string, phone: string) {
+export async function serverAddCustomer(shopId: string, name: string, phone: string, serviceId: string | null = null) {
   const supabase = await createAdminSupabase();
   const { data: last } = await (supabase.from("queue_entries") as any)
     .select("ticket_number")
@@ -38,6 +38,7 @@ export async function serverAddCustomer(shopId: string, name: string, phone: str
 
   const { error } = await (supabase.from("queue_entries") as any).insert({
     shop_id: shopId,
+    service_id: serviceId || undefined,
     ticket_number: next,
     customer_name: name.trim(),
     customer_phone: phone.replace(/\D/g, ""),

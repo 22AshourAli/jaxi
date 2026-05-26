@@ -17,6 +17,7 @@ import {
   Shield,
   Zap,
   HeartHandshake,
+  Quote,
 } from "lucide-react";
 
 const DAYS = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"] as const;
@@ -27,6 +28,16 @@ const features = [
   { icon: Zap, ar: "خدمة سريعة بدون انتظار طويل", en: "Fast Service, Minimal Wait" },
   { icon: HeartHandshake, ar: "ضمان الرضا التام عن الخدمة", en: "100% Satisfaction Guaranteed" },
 ];
+
+const serviceIcons: Record<string, string> = {
+  "حلاقة شعر": "✂️",
+  "حلاقة دقن": "🪒",
+  "حلاقة شعر + دقن": "💈",
+  "استشوار ومكواة": "💨",
+  "صبغ شعر": "🎨",
+  "غسيل وجه": "🧼",
+  "عناية كاملة (شعر + دقن + غسيل)": "⭐",
+};
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
@@ -62,27 +73,25 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
       {/* ═══ HERO ═══ */}
       <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4">
-        {/* Video background */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="https://images.unsplash.com/photo-1585747861115-bb9eef06b30c?w=1600&q=80"
-          className="absolute inset-0 h-full w-full object-cover"
-        >
-          <source src="https://videos.pexels.com/video-files/8867395/8867395-uhd_2732_1440_25fps.mp4" type="video/mp4" />
-          <source src="https://videos.pexels.com/video-files/7697121/7697121-uhd_2732_1440_25fps.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/95" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_60%)] opacity-20" />
+        {/* Animated gradient background (always loads, no external dependency) */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,var(--primary)_0%,transparent_60%)] opacity-30" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_120%,var(--accent)_0%,transparent_60%)] opacity-20" />
+
+        {/* Animated grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_60%,transparent_110%)]" />
 
-        {/* Floating orbs */}
-        <div className="pointer-events-none absolute left-1/4 top-1/4 h-80 w-80 rounded-full bg-primary/10 blur-3xl animate-float" />
-        <div className="pointer-events-none absolute right-1/4 top-1/3 h-64 w-64 rounded-full bg-accent/10 blur-3xl animate-float" style={{ animationDelay: "-1.5s", animationDuration: "4s" }} />
+        {/* Animated floating orbs */}
+        <div className="pointer-events-none absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl animate-float" style={{ animationDuration: "8s" }} />
+        <div className="pointer-events-none absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-accent/5 blur-3xl animate-float" style={{ animationDelay: "-3s", animationDuration: "10s" }} />
+
+        {/* Scissors decorative element */}
+        <div className="pointer-events-none absolute left-1/2 top-8 -translate-x-1/2 opacity-[0.03] text-[200px] select-none">
+          ✂️
+        </div>
 
         <div className="relative mx-auto max-w-3xl text-center">
+          {/* Animated entrance */}
           <div className="mx-auto mb-6 [animation:bounce-in_0.7s_ease-out]">
             <Logo size="xl" />
           </div>
@@ -110,10 +119,17 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <LandingQueueStatus shopId={shop.id} avgServiceTime={shop.avg_service_time || 20} locale={locale} dict={dict} />
           </div>
         )}
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="flex h-10 w-6 items-start justify-center rounded-full border border-border p-1">
+            <div className="h-2 w-1 rounded-full bg-muted-foreground/50 animate-float" />
+          </div>
+        </div>
       </section>
 
       {/* ═══ WHY US ═══ */}
-      <section className="relative border-t border-border px-4 py-16 sm:py-20">
+      <section data-animate className="relative border-t border-border px-4 py-16 sm:py-20">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_60%)] opacity-[0.03]" />
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">
@@ -122,12 +138,12 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               {isRtl ? "لماذا تختارنا؟" : "Why Choose Us?"}
             </h2>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div data-animate-grid className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((f, i) => (
               <div
                 key={i}
-                className="group rounded-xl border border-border bg-card/80 p-5 text-center shadow-sm backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-primary/20 hover:shadow-md [animation:slide-up_0.4s_ease-out_0.1s_both]"
-                style={{ animationDelay: `${i * 0.1}s` }}
+                data-animate-item
+                className="group rounded-xl border border-border bg-card/80 p-5 text-center shadow-sm backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-primary/20 hover:shadow-md"
               >
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 shadow-sm group-hover:scale-110 transition-transform">
                   <f.icon className="h-6 w-6 text-primary" />
@@ -141,7 +157,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
       {/* ═══ SERVICES ═══ */}
       {serviceList.length > 0 && (
-        <section className="relative border-t border-border px-4 py-16 sm:py-20">
+        <section data-animate className="relative border-t border-border px-4 py-16 sm:py-20">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--accent)_0%,transparent_60%)] opacity-[0.03]" />
           <div className="mx-auto max-w-4xl">
             <div className="mb-10 text-center">
@@ -154,17 +170,17 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div data-animate-grid className="grid gap-3 sm:grid-cols-2">
               {serviceList.map((svc: any, i: number) => (
                 <div
                   key={svc.id}
-                  className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md [animation:slide-up_0.4s_ease-out]"
-                  style={{ animationDelay: `${i * 0.08}s`, animationFillMode: "backwards" }}
+                  data-animate-item
+                  className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 shadow-sm group-hover:scale-110 transition-transform">
-                        <Scissors className="h-5 w-5 text-primary" />
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 shadow-sm group-hover:scale-110 transition-transform text-lg">
+                        {serviceIcons[svc.name] || "✂️"}
                       </div>
                       <div>
                         <p className="font-semibold">{svc.name}</p>
@@ -188,7 +204,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
       {/* ═══ WORKING HOURS ═══ */}
       {Object.keys(hours).length > 0 && (
-        <section className="relative border-t border-border px-4 py-16 sm:py-20">
+        <section data-animate className="relative border-t border-border px-4 py-16 sm:py-20">
           <div className="mx-auto max-w-md text-center">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
               {isRtl ? "ساعات العمل" : "Working Hours"}
@@ -204,8 +220,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                 return (
                   <div
                     key={day}
-                    className="flex items-center justify-between rounded-xl border border-border bg-card/50 px-5 py-3 backdrop-blur-sm [animation:slide-up_0.3s_ease-out]"
-                    style={{ animationDelay: `${i * 0.06}s`, animationFillMode: "backwards" }}
+                    className="flex items-center justify-between rounded-xl border border-border bg-card/50 px-5 py-3 backdrop-blur-sm"
                   >
                     <span className="text-sm font-medium">{label}</span>
                     <span className="text-sm text-muted-foreground">
@@ -220,7 +235,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       )}
 
       {/* ═══ CONTACT ═══ */}
-      <section className="relative border-t border-border px-4 py-16 sm:py-20">
+      <section data-animate className="relative border-t border-border px-4 py-16 sm:py-20">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_60%)] opacity-[0.03]" />
         <div className="mx-auto max-w-lg text-center">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">

@@ -10,6 +10,7 @@ type QueueEntry = {
   customer_phone: string | null;
   customer_name?: string | null;
   created_at: string;
+  service_name?: string;
 };
 
 type Props = {
@@ -56,6 +57,9 @@ export function QueueList({ entries, dict, onComplete, onNoShow }: Props) {
             </span>
             <div>
               <p className="font-medium">{entry.customer_name || dict.dashboard.waiting}</p>
+              {entry.service_name && (
+                <p className="text-[10px] text-primary/60 font-medium">{entry.service_name}</p>
+              )}
               <p className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {timeAgo(entry.created_at)}
