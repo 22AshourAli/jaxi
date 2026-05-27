@@ -128,6 +128,7 @@ export function JoinForm({ locale, dict }: Props) {
             setAvgServiceTime(data.avgServiceTime || 20);
             setPhone(data.phone || "");
             setName(data.name || "");
+            setSelectedServiceNames(data.selectedServiceNames || "");
       setSubmitted(true);
       // Celebrate!
       confetti({
@@ -154,13 +155,13 @@ export function JoinForm({ locale, dict }: Props) {
     if (submitted && entryId && ticketNumber) {
       localStorage.setItem(
         LS_KEY,
-        JSON.stringify({ entryId, shopId, ticketNumber, shopName, avgServiceTime, phone, name })
+        JSON.stringify({ entryId, shopId, ticketNumber, shopName, avgServiceTime, phone, name, selectedServiceNames })
       );
     }
     if (cancelled || completed) {
       localStorage.removeItem(LS_KEY);
     }
-  }, [submitted, entryId, ticketNumber, shopId, shopName, avgServiceTime, phone, name, cancelled, completed]);
+  }, [submitted, entryId, ticketNumber, shopId, shopName, avgServiceTime, phone, name, selectedServiceNames, cancelled, completed]);
 
   // Real-time queue subscription
   useEffect(() => {
