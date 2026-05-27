@@ -1,4 +1,4 @@
-const CACHE = "dawrk-v3";
+const CACHE = "dawrk-v4";
 const STATIC_ASSETS = [
   "/offline.html",
   "/icons/icon-192x192.svg",
@@ -24,7 +24,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Listen for skipWaiting message
 self.addEventListener("message", (event) => {
   if (event.data?.action === "skipWaiting") {
     self.skipWaiting();
@@ -35,12 +34,26 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
 
-  // Static assets & Next.js chunks: cache-first
+  // Same-origin only
+  if (url.origin !== self.location.origin) return;
+
+  // Next.js static chunks: cache-first (never change between deployments)
   if (
-    STATIC_ASSETS.includes(url.pathname) ||
     url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/icons/")
   ) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => cached || fetch(event.request).then((res) => {
+        const clone = res.clone();
+        caches.open(CACHE).then((cache) => cache.put(event.request, clone));
+        return res;
+      }))
+    );
+    return;
+  }
+
+  // Static assets from our list: cache-first
+  if (STATIC_ASSETS.includes(url.pathname)) {
     event.respondWith(
       caches.match(event.request).then((cached) => cached || fetch(event.request))
     );
@@ -57,13 +70,13 @@ self.addEventListener("fetch", (event) => {
           return res;
         })
         .catch(() =>
-          caches.match("/offline.html")
+          caches.match("/offline.html").then((cached) => cached || caches.match(event.request))
         )
     );
     return;
   }
 
-  // Everything else: network-first
+  // API / data requests: network-first
   event.respondWith(
     fetch(event.request)
       .then((res) => {

@@ -6,6 +6,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import { Header } from "@/components/shared/header";
 import { Logo } from "@/components/shared/logo";
 import { LandingQueueStatus } from "@/components/landing/queue-status";
+import { InstallPWA } from "@/components/shared/install-pwa";
 import {
   Scissors,
   ArrowRight,
@@ -50,6 +51,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { data: shop } = await (supabase.from("shops") as any).select("*").limit(1).maybeSingle();
   const { data: services } = await (supabase.from("services") as any)
     .select("*")
+    .eq("is_active", true)
     .order("sort_order", { ascending: true });
 
   const serviceList = (services as any[]) || [];
@@ -299,6 +301,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           <p className="mt-4 text-xs">&copy; {new Date().getFullYear()} {shop?.name || dict.site.title}. {isRtl ? "جميع الحقوق محفوظة" : "All rights reserved"}</p>
         </div>
       </footer>
+
+      <InstallPWA locale={locale} />
     </div>
   );
 }

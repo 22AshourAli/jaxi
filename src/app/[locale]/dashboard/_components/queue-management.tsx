@@ -8,14 +8,10 @@ import { createClient } from "@/lib/supabase/client";
 import { sendTurnNotification } from "@/actions/notifications";
 import { serverCallNext, serverComplete, serverNoShow, serverAddCustomer, serverDeleteEntry } from "@/actions/queue";
 import { phoneLink, whatsappLink, formatPhoneDisplay } from "@/lib/phone";
+import { getServiceNames, decodeCustomerName } from "@/lib/booking";
 import { PhoneDisplay } from "@/components/shared/phone-display";
 import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User, Trash2, MessageCircle, ChevronDown, History, Scissors } from "lucide-react";
-import { QueueSkeleton, StatsSkeleton, Skeleton } from "@/components/shared/skeleton";
-
-function getServiceNames(entry: QueueEntry, map: Map<string, string>): string {
-  const ids = entry.service_ids ? entry.service_ids.split(",").filter(Boolean) : entry.service_id ? [entry.service_id] : [];
-  return ids.map((id) => map.get(id) || "").filter(Boolean).join(" + ");
-}
+import { Skeleton, QueueSkeleton, StatsSkeleton } from "@/components/shared/skeleton";
 
 type Service = {
   id: string;
@@ -72,6 +68,7 @@ export function QueueManagement({ locale, dict }: Props) {
       // Fetch services for mapping
       const { data: svcData } = await (supabase.from("services") as any)
         .select("id, name")
+        .eq("is_active", true)
         .order("sort_order", { ascending: true });
       const svcMap = new Map<string, string>();
       if (svcData) {
@@ -93,6 +90,7 @@ export function QueueManagement({ locale, dict }: Props) {
         if (data) {
           const entries = (data as QueueEntry[]).map((e) => ({
             ...e,
+            customer_name: decodeCustomerName(e.customer_name).name,
             service_name: getServiceNames(e, svcMap),
           }));
           setEntries(entries);
@@ -130,6 +128,7 @@ export function QueueManagement({ locale, dict }: Props) {
               if (data) {
                 const entries = (data as QueueEntry[]).map((e) => ({
                   ...e,
+                  customer_name: decodeCustomerName(e.customer_name).name,
                   service_name: getServiceNames(e, servicesRef.current),
                 }));
                 setEntries(entries);
@@ -201,6 +200,7 @@ export function QueueManagement({ locale, dict }: Props) {
     if (data) {
       const mapped = (data as any[]).map((e: any) => ({
         ...e,
+        customer_name: decodeCustomerName(e.customer_name).name,
         service_name: getServiceNames(e, services),
       }));
       setHistoryEntries(mapped);
@@ -323,7 +323,10 @@ export function QueueManagement({ locale, dict }: Props) {
                         <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground truncate">{serving.customer_name}</p>
                       )}
                       {serving.service_name && (
-                        <p className="text-[10px] text-primary/70 font-medium truncate">{serving.service_name}</p>
+                        <p className="mt-0.5 flex items-center gap-1 text-[10px] sm:text-xs text-primary/70 font-medium truncate">
+                          <Scissors className="h-3 w-3 shrink-0" />
+                          {serving.service_name}
+                        </p>
                       )}
                     </div>
                     <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10">
@@ -404,68 +407,71 @@ export function QueueManagement({ locale, dict }: Props) {
                       return (
                         <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center">
                           <UserCheck className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-                          <p className="text-muted-foreground">{locale === "ar" ? "لا يوجد عملاء منتهيون اليوم" : "No completed customers today"}</p>
+                          <p className="text-muted-foreground">{locale === "ar" ? "لا يوجد عملاء منتهيون" : "No completed customers"}</p>
                         </div>
                       );
                     }
                     return completed.map((entry, i) => (
                       <div
                         key={entry.id}
-                        className="animate-slide-up flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                        className="animate-slide-up rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                         style={{ animationDelay: `${i * 40}ms`, animationFillMode: "backwards" }}
                       >
-                        <div className="flex items-center gap-4 min-w-0">
-                          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-success/10 text-lg font-bold text-success shadow-sm">
+                        <div className="flex items-center gap-3 p-3 sm:p-4">
+                          <span className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-success/10 text-base sm:text-lg font-bold text-success shadow-sm">
                             #{entry.ticket_number}
                           </span>
-                          <div className="min-w-0">
-                            <p className="font-medium truncate">{entry.customer_name || `#${entry.ticket_number}`}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm sm:text-base font-medium truncate">{entry.customer_name || `#${entry.ticket_number}`}</p>
                             {entry.service_name && (
-                              <p className="text-[10px] text-primary/60 font-medium truncate">{entry.service_name}</p>
+                              <p className="mt-0.5 flex items-center gap-1 text-[10px] sm:text-xs text-primary/60 font-medium truncate">
+                                <Scissors className="h-3 w-3 shrink-0" />
+                                {entry.service_name}
+                              </p>
                             )}
                             {entry.customer_phone && (
-                              <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                              <p className="mt-0.5 flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
                                 <Phone className="h-3 w-3 shrink-0" />
                                 <PhoneDisplay phone={entry.customer_phone} />
                               </p>
                             )}
                           </div>
-                        </div>
-                        <div className="flex gap-1.5 shrink-0">
-                          {entry.customer_phone && (
-                            <>
-                              <a
-                                href={phoneLink(entry.customer_phone)}
-                                className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted active:scale-95"
-                                title={locale === "ar" ? "اتصال" : "Call"}
-                              >
-                                <Phone className="h-3.5 w-3.5" />
-                              </a>
-                              <a
-                                href={whatsappLink(entry.customer_phone)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs font-medium text-success transition hover:bg-success/10 active:scale-95"
-                                title="WhatsApp"
-                              >
-                                <MessageCircle className="h-3.5 w-3.5" />
-                              </a>
-                              <button
-                                onClick={() => handleShowHistory(entry.customer_phone!)}
-                                className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted active:scale-95"
-                                title={locale === "ar" ? "السجل" : "History"}
-                              >
-                                <History className="h-3.5 w-3.5" />
-                              </button>
-                            </>
-                          )}
-                          <button
-                            onClick={() => handleDelete(entry.id)}
-                            className="flex items-center gap-1 rounded-xl border border-destructive/30 px-3 py-2 text-xs font-medium text-destructive transition hover:bg-destructive/10 active:scale-95"
-                            title={locale === "ar" ? "حذف" : "Delete"}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          <div className="flex gap-1 shrink-0">
+                            {entry.customer_phone && (
+                              <>
+                                <a
+                                  href={phoneLink(entry.customer_phone)}
+                                  className="flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-xs font-medium text-muted-foreground transition hover:bg-muted active:scale-95"
+                                  title={locale === "ar" ? "اتصال" : "Call"}
+                                >
+                                  <Phone className="h-3 w-3" />
+                                </a>
+                                <a
+                                  href={whatsappLink(entry.customer_phone)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-xs font-medium text-success transition hover:bg-success/10 active:scale-95"
+                                  title="WhatsApp"
+                                >
+                                  <MessageCircle className="h-3 w-3" />
+                                </a>
+                                <button
+                                  onClick={() => handleShowHistory(entry.customer_phone!)}
+                                  className="flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-xs font-medium text-muted-foreground transition hover:bg-muted active:scale-95"
+                                  title={locale === "ar" ? "السجل" : "History"}
+                                >
+                                  <History className="h-3 w-3" />
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => handleDelete(entry.id)}
+                              className="flex items-center gap-1 rounded-lg border border-destructive/30 px-2 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-xs font-medium text-destructive transition hover:bg-destructive/10 active:scale-95"
+                              title={locale === "ar" ? "حذف" : "Delete"}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ));

@@ -61,7 +61,7 @@ export default function RootLayout({
           {`{"@context":"https://schema.org","@type":"BarberShop","name":"جاكسي","url":"https://dorak-pearl.vercel.app","telephone":"+201094022327","address":{"@type":"PostalAddress","addressLocality":"الناصرية","addressCountry":"EG"},"openingHours":"Sa-Th 10:00-22:00","priceRange":"₤"}`}
         </Script>
         <Script id="sw-register" strategy="afterInteractive">
-          {`if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").then(function(reg){reg.onupdatefound=function(){var installing=reg.installing;installing.onstatechange=function(){if(installing.state==="installed"&&navigator.serviceWorker.controller){if(confirm("نسخة جديدة متاحة! تحديث الآن؟\\nNew version available! Update now?")){window.location.reload()}}}}})}`}
+          {`if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").then(function(reg){reg.onupdatefound=function(){var installing=reg.installing;installing.onstatechange=function(){if(installing.state==="installed"&&navigator.serviceWorker.controller){if(confirm("نسخة جديدة متاحة! تحديث الآن؟\\nNew version available! Update now?")){window.location.reload()}}}}})})}`}
         </Script>
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>

@@ -7,6 +7,7 @@ import { useNotification } from "@/hooks/use-notification";
 import { useToast } from "@/components/shared/toast";
 import { Logo } from "@/components/shared/logo";
 import { formatPhoneDisplay, whatsappLink } from "@/lib/phone";
+import { encodeCustomerName } from "@/lib/booking";
 import confetti from "canvas-confetti";
 import {
   Loader2,
@@ -80,6 +81,7 @@ export function JoinForm({ locale, dict }: Props) {
     supabase
       .from("services")
       .select("*")
+      .eq("is_active", true)
       .order("sort_order", { ascending: true })
       .then(({ data }) => {
         if (data) {
@@ -377,11 +379,12 @@ export function JoinForm({ locale, dict }: Props) {
       const lastTicket = (lastEntry as any)?.ticket_number || 0;
       const nextNumber = lastTicket + 1;
 
+      const customer_name = encodeCustomerName(name.trim(), selectedServices);
       const insertData: any = {
         shop_id: shop.id,
         service_id: selectedServices[0],
         ticket_number: nextNumber,
-        customer_name: name.trim(),
+        customer_name,
         customer_phone: phone.replace(/\D/g, ""),
         status: "waiting",
       };
@@ -401,7 +404,7 @@ export function JoinForm({ locale, dict }: Props) {
             shop_id: shop.id,
             service_id: selectedServices[0],
             ticket_number: nextNumber,
-            customer_name: name.trim(),
+            customer_name,
             customer_phone: phone.replace(/\D/g, ""),
             status: "waiting",
           })

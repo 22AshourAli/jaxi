@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "جاكسي",
+    name: "جاكسي - صالون حلاقة",
     short_name: "جاكسي",
     description: "حجز دورك في صالون الحلاقة - جاكسي",
     start_url: "/ar",
@@ -12,6 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait",
     lang: "ar",
     dir: "rtl",
+    categories: ["lifestyle", "utilities"],
+    prefer_related_applications: false,
     icons: [
       { src: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
       { src: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
