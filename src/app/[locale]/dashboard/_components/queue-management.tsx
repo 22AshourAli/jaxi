@@ -10,7 +10,7 @@ import { serverCallNext, serverComplete, serverNoShow, serverAddCustomer, server
 import { phoneLink, whatsappLink, formatPhoneDisplay } from "@/lib/phone";
 import { getServiceNames, decodeCustomerName } from "@/lib/booking";
 import { PhoneDisplay } from "@/components/shared/phone-display";
-import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User, Trash2, MessageCircle, ChevronDown, History, Scissors } from "lucide-react";
+import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User, Trash2, MessageCircle, ChevronDown, History, Scissors, Sparkles } from "lucide-react";
 import { Skeleton, QueueSkeleton, StatsSkeleton } from "@/components/shared/skeleton";
 
 type Service = {
@@ -323,10 +323,17 @@ export function QueueManagement({ locale, dict }: Props) {
                         <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground truncate">{serving.customer_name}</p>
                       )}
                       {serving.service_name && (
-                        <p className="mt-0.5 flex items-center gap-1 text-[10px] sm:text-xs text-primary/70 font-medium truncate">
-                          <Scissors className="h-3 w-3 shrink-0" />
-                          {serving.service_name}
-                        </p>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                          {serving.service_name.split(" + ").map((svc, i) => (
+                            <span
+                              key={i}
+                              className="inline-flex items-center gap-0.5 rounded-md bg-primary/10 px-2 py-0.5 text-[10px] sm:text-xs font-medium text-primary leading-tight"
+                            >
+                              <Sparkles className="h-2.5 w-2.5" />
+                              {svc}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
                     <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10">
@@ -424,10 +431,17 @@ export function QueueManagement({ locale, dict }: Props) {
                           <div className="min-w-0 flex-1">
                             <p className="text-sm sm:text-base font-medium truncate">{entry.customer_name || `#${entry.ticket_number}`}</p>
                             {entry.service_name && (
-                              <p className="mt-0.5 flex items-center gap-1 text-[10px] sm:text-xs text-primary/60 font-medium truncate">
-                                <Scissors className="h-3 w-3 shrink-0" />
-                                {entry.service_name}
-                              </p>
+                              <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                                {entry.service_name.split(" + ").map((svc, i) => (
+                                  <span
+                                    key={i}
+                                    className="inline-flex items-center gap-0.5 rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary leading-tight"
+                                  >
+                                    <Sparkles className="h-2.5 w-2.5" />
+                                    {svc}
+                                  </span>
+                                ))}
+                              </div>
                             )}
                             {entry.customer_phone && (
                               <p className="mt-0.5 flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
@@ -518,7 +532,16 @@ export function QueueManagement({ locale, dict }: Props) {
                         #{e.ticket_number}
                       </span>
                       <div className="min-w-0">
-                        {e.service_name && <p className="text-xs font-medium text-foreground truncate">{e.service_name}</p>}
+                        {e.service_name && (
+                          <div className="flex flex-wrap items-center gap-1">
+                            {e.service_name.split(" + ").map((svc: string, j: number) => (
+                              <span key={j} className="inline-flex items-center gap-0.5 rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary leading-tight">
+                                <Sparkles className="h-2.5 w-2.5" />
+                                {svc}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         <p className="text-[10px] text-muted-foreground">
                           {new Date(e.created_at).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
                             day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"

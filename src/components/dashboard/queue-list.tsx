@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Phone, Check, X, Clock, Scissors, MessageCircle, PhoneCall, MoreHorizontal } from "lucide-react";
+import { Phone, Check, X, Clock, Scissors, MessageCircle, PhoneCall, MoreHorizontal, Sparkles } from "lucide-react";
 import { PhoneDisplay } from "@/components/shared/phone-display";
 import { phoneLink, whatsappLink } from "@/lib/phone";
 type QueueEntry = {
@@ -90,10 +90,17 @@ function QueueCard({
         <div className="min-w-0 flex-1">
           <p className="text-sm sm:text-base font-medium truncate">{entry.customer_name || `#${entry.ticket_number}`}</p>
           {entry.service_name && (
-            <p className="mt-0.5 flex items-center gap-1 text-[10px] sm:text-xs text-primary/60 font-medium truncate">
-              <Scissors className="h-3 w-3 shrink-0" />
-              {entry.service_name}
-            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-1">
+              {entry.service_name.split(" + ").map((svc, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-0.5 rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary leading-tight"
+                >
+                  <Sparkles className="h-2.5 w-2.5" />
+                  {svc}
+                </span>
+              ))}
+            </div>
           )}
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] sm:text-xs text-muted-foreground">
             <span className="flex items-center gap-0.5">
