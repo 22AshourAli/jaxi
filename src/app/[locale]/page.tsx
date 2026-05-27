@@ -19,6 +19,10 @@ import {
   Zap,
   HeartHandshake,
   Quote,
+  Play,
+  Award,
+  Wind,
+  UserCheck,
 } from "lucide-react";
 
 const DAYS = ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"] as const;
@@ -203,6 +207,174 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           </div>
         </section>
       )}
+
+      {/* ═══ GALLERY ═══ */}
+      <section data-animate className="relative border-t border-border px-4 py-16 sm:py-24 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_60%)] opacity-[0.03]" />
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-10 text-center" data-animate>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              {isRtl ? "معرض الصور" : "Gallery"}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {isRtl ? "جودة واهتمام بالتفاصيل" : "Quality and attention to detail"}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4" data-animate-grid>
+            {[
+              { label: isRtl ? "حلاقة عصرية" : "Modern Haircut", gradient: "from-blue-400/20 to-purple-400/20", icon: "✂️" },
+              { label: isRtl ? "عناية باللحية" : "Beard Care", gradient: "from-amber-400/20 to-orange-400/20", icon: "🪒" },
+              { label: isRtl ? "بيئة نظيفة" : "Clean Environment", gradient: "from-emerald-400/20 to-teal-400/20", icon: "✨" },
+              { label: isRtl ? "استشوار احترافي" : "Professional Styling", gradient: "from-rose-400/20 to-pink-400/20", icon: "💨" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                data-animate-item
+                className="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-1"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} group-hover:scale-110 transition-transform duration-700`}>
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
+                </div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                  <span className="text-4xl sm:text-5xl mb-3 opacity-80 group-hover:scale-125 group-hover:opacity-100 transition-all duration-500">
+                    {item.icon}
+                  </span>
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background/80 to-transparent pt-8">
+                    <p className="font-semibold text-sm sm:text-base">{item.label}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ LUXURY & CLEANLINESS ═══ */}
+      <section data-animate className="relative border-t border-border px-4 py-16 sm:py-24 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,var(--accent)_0%,transparent_60%)] opacity-[0.03]" />
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-12 text-center" data-animate>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              {isRtl ? "فخامة ونظافة عالمية" : "Luxury & World-Class Cleanliness"}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto">
+              {isRtl
+                ? "نقدم لك تجربة حلاقة راقية في بيئة نظيفة ومعقمة بأعلى المعايير العالمية"
+                : "Experience premium grooming in a pristine, sterile environment meeting the highest standards"}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" data-animate-grid>
+            {[
+              {
+                icon: Shield,
+                title: isRtl ? "أدوات معقمة" : "Sterile Tools",
+                desc: isRtl ? "جميع الأدوات معقمة ومعبأة بشكل فردي لكل عميل" : "All tools sterilized and individually packaged for each client",
+                gradient: "from-primary/10 to-accent/10",
+              },
+              {
+                icon: Wind,
+                title: isRtl ? "تهوية متطورة" : "Advanced Ventilation",
+                desc: isRtl ? "نظام تهوية متطور يضمن هواء نقي طوال الوقت" : "Advanced ventilation system ensuring fresh air at all times",
+                gradient: "from-accent/10 to-primary/10",
+              },
+              {
+                icon: Award,
+                title: isRtl ? "منتجات فاخرة" : "Premium Products",
+                desc: isRtl ? "نستخدم أفضل منتجات العناية بالشعر والبشرة العالمية" : "We use the best international hair and skin care products",
+                gradient: "from-primary/10 to-accent/10",
+              },
+              {
+                icon: UserCheck,
+                title: isRtl ? "حلاقين محترفين" : "Professional Barbers",
+                desc: isRtl ? "فريق من الحلاقين المحترفين بخبرة سنوات في المجال" : "A team of professional barbers with years of experience",
+                gradient: "from-accent/10 to-primary/10",
+              },
+              {
+                icon: Sparkles,
+                title: isRtl ? "نظافة فائقة" : "Ultimate Cleanliness",
+                desc: isRtl ? "تعقيم شامل بين كل عميل وآخر لضمان سلامتك" : "Complete sterilization between each client for your safety",
+                gradient: "from-primary/10 to-accent/10",
+              },
+              {
+                icon: Star,
+                title: isRtl ? "خدمة متميزة" : "Premium Service",
+                desc: isRtl ? "نقدم مشروبات ترحيبية وأجواء مريحة أثناء الانتظار" : "Welcome drinks and a relaxing atmosphere while you wait",
+                gradient: "from-accent/10 to-primary/10",
+              },
+            ].map((item, i) => (
+              <div
+                key={i}
+                data-animate-item
+                className="group rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20"
+              >
+                <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${item.gradient} shadow-sm mb-4 group-hover:scale-110 transition-transform duration-500`}>
+                  <item.icon className="h-7 w-7 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-1.5">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ VIDEO SECTION ═══ */}
+      <section data-animate className="relative border-t border-border px-4 py-16 sm:py-24 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
+        <div className="mx-auto max-w-4xl text-center">
+          <div data-animate>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              {isRtl ? "جولة في المحل" : "Tour Our Shop"}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground max-w-lg mx-auto">
+              {isRtl
+                ? "شاهد بنفسك جودة الخدمات والأجواء الفاخرة في صالون جاكسي"
+                : "See for yourself the quality and luxury atmosphere at Jaxi salon"}
+            </p>
+          </div>
+
+          <div className="mt-8 relative rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-primary/5 to-accent/5 aspect-video flex items-center justify-center group cursor-pointer" data-animate>
+            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+            <div className="relative z-10 flex flex-col items-center gap-3">
+              <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-primary/20 backdrop-blur-sm group-hover:bg-primary/30 group-hover:scale-110 transition-all duration-500 shadow-xl">
+                <Play className="h-7 w-7 sm:h-9 sm:w-9 text-primary fill-primary ml-0.5" />
+              </div>
+              <p className="text-sm font-medium text-foreground/80">
+                {isRtl ? "شاهد الفيديو" : "Watch Video"}
+              </p>
+            </div>
+            {/* Decorative grid */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-30" />
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ STATS ═══ */}
+      <section className="relative border-t border-border px-4 py-16 sm:py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_60%)] opacity-[0.03]" />
+        <div className="mx-auto max-w-4xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center" data-animate-grid>
+            {[
+              { count: 5, label: isRtl ? "سنوات خبرة" : "Years Experience", icon: "⭐" },
+              { count: 1500, label: isRtl ? "عميل سعيد" : "Happy Clients", icon: "😊" },
+              { count: 25, label: isRtl ? "خدمة احترافية" : "Services", icon: "✂️" },
+              { count: 100, label: isRtl ? "رضا مضمون" : "Satisfaction %", icon: "💯", suffix: "%" },
+            ].map((stat, i) => (
+              <div
+                key={i}
+                data-animate-item
+                className="rounded-2xl border border-border bg-card/50 p-6 sm:p-8 backdrop-blur-sm shadow-sm"
+              >
+                <span className="text-2xl sm:text-3xl mb-2 block">{stat.icon}</span>
+                <p className="text-3xl sm:text-4xl font-bold text-primary" data-count-to={stat.count}>{stat.count}{stat.suffix || ""}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ═══ WORKING HOURS ═══ */}
       {Object.keys(hours).length > 0 && (
