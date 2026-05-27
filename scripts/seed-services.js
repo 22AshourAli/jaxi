@@ -13,7 +13,7 @@ async function main() {
 
   const shopId = '718db02b-02cf-4754-bafa-b7dedb841e9b';
 
-  // Individual services only - half of original times per user request
+  // Individual services only - times reduced to ~1/3 of original
   const services = [
     ['حلاقة شعر', 15, 1],
     ['حلاقة دقن', 8, 2],
