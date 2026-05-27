@@ -62,9 +62,6 @@ export function QueueManagement({ locale, dict }: Props) {
   const isRtl = locale === "ar";
 
   useEffect(() => {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
     const fetchData = async () => {
       const shopRes = await (supabase.from("shops") as any).select("id, name").limit(1).maybeSingle();
       if (shopRes.data) {
@@ -90,7 +87,6 @@ export function QueueManagement({ locale, dict }: Props) {
           .from("queue_entries")
           .select("*")
           .eq("shop_id", shopRes.data.id)
-          .gte("created_at", todayStart.toISOString())
           .neq("status", "cancelled")
           .order("ticket_number", { ascending: true });
 
@@ -124,13 +120,10 @@ export function QueueManagement({ locale, dict }: Props) {
           filter: `shop_id=eq.${shopId}`,
         },
         () => {
-          const todayStart = new Date();
-          todayStart.setHours(0, 0, 0, 0);
           supabase
             .from("queue_entries")
             .select("*")
             .eq("shop_id", shopId)
-            .gte("created_at", todayStart.toISOString())
             .neq("status", "cancelled")
             .order("ticket_number", { ascending: true })
             .then(({ data }) => {
