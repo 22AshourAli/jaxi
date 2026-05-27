@@ -47,3 +47,26 @@ export async function serverAddCustomer(shopId: string, name: string, phone: str
   });
   return { error: error?.message ?? null };
 }
+
+export async function serverSyncServiceTimes() {
+  const supabase = await createAdminSupabase();
+  const shopId = "718db02b-02cf-4754-bafa-b7dedb841e9b";
+  const times: Record<string, number> = {
+    "حلاقة شعر": 15,
+    "حلاقة دقن": 8,
+    "استشوار ومكواة": 10,
+    "صبغ شعر": 30,
+    "غسيل وجه": 8,
+  };
+  const errors: string[] = [];
+  for (const [name, duration] of Object.entries(times)) {
+    const { error } = await (supabase.from("services") as any)
+      .update({ duration_minutes: duration })
+      .eq("shop_id", shopId)
+      .eq("name", name);
+    if (error) errors.push(`${name}: ${error.message}`);
+  }
+  // Also add service_ids column if missing
+  // await supabase.rpc... not available, skip
+  return { errors: errors.length > 0 ? errors.join("; ") : null };
+}
