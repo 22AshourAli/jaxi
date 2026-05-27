@@ -1,13 +1,12 @@
-const CACHE = "dawrk-v2";
+const CACHE = "dawrk-v3";
 const STATIC_ASSETS = [
+  "/offline.html",
   "/icons/icon-192x192.svg",
   "/icons/icon-512x512.svg",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
   "/manifest.webmanifest",
 ];
-
-const OFFLINE_PAGE = "/offline";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -21,24 +20,35 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    ).then(() => clients.claim())
+    ).then(() => self.clients.claim())
   );
+});
+
+// Listen for skipWaiting message
+self.addEventListener("message", (event) => {
+  if (event.data?.action === "skipWaiting") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
 
-  // Static assets: cache-first
-  if (STATIC_ASSETS.includes(url.pathname) || url.pathname.startsWith("/_next/static/")) {
+  // Static assets & Next.js chunks: cache-first
+  if (
+    STATIC_ASSETS.includes(url.pathname) ||
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/icons/")
+  ) {
     event.respondWith(
       caches.match(event.request).then((cached) => cached || fetch(event.request))
     );
     return;
   }
 
-  // Navigation requests: network-first, fallback to cache, then offline page
-  if (url.pathname.startsWith("/ar") || url.pathname.startsWith("/en") || url.pathname === "/") {
+  // Navigation requests: network-first, fallback to offline.html
+  if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
         .then((res) => {
@@ -47,21 +57,8 @@ self.addEventListener("fetch", (event) => {
           return res;
         })
         .catch(() =>
-          caches.match(event.request).then((cached) =>
-            cached || caches.match(OFFLINE_PAGE)
-          )
+          caches.match("/offline.html")
         )
-    );
-    return;
-  }
-
-  // API requests: network-first, no cache fallback
-  if (url.pathname.startsWith("/api/")) {
-    event.respondWith(
-      fetch(event.request).catch(() => new Response(JSON.stringify({ error: "offline" }), {
-        status: 503,
-        headers: { "Content-Type": "application/json" },
-      }))
     );
     return;
   }
