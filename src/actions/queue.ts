@@ -66,7 +66,49 @@ export async function serverSyncServiceTimes() {
       .eq("name", name);
     if (error) errors.push(`${name}: ${error.message}`);
   }
-  // Also add service_ids column if missing
-  // await supabase.rpc... not available, skip
   return { errors: errors.length > 0 ? errors.join("; ") : null };
+}
+
+// ── Service Management ──
+
+export async function serverGetServices() {
+  const supabase = await createAdminSupabase();
+  const { data, error } = await (supabase.from("services") as any)
+    .select("*")
+    .order("sort_order", { ascending: true });
+  return { data: (data as any[]) || [], error: error?.message ?? null };
+}
+
+export async function serverAddService(name: string, durationMinutes: number) {
+  const supabase = await createAdminSupabase();
+  const shopId = "718db02b-02cf-4754-bafa-b7dedb841e9b";
+  const { data: max } = await (supabase.from("services") as any)
+    .select("sort_order")
+    .eq("shop_id", shopId)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextSort = ((max as any)?.sort_order || 0) + 1;
+  const { error } = await (supabase.from("services") as any).insert({
+    shop_id: shopId,
+    name: name.trim(),
+    duration_minutes: durationMinutes,
+    sort_order: nextSort,
+    is_active: true,
+  });
+  return { error: error?.message ?? null };
+}
+
+export async function serverUpdateService(id: string, updates: { name?: string; duration_minutes?: number; is_active?: boolean; sort_order?: number }) {
+  const supabase = await createAdminSupabase();
+  const { error } = await (supabase.from("services") as any)
+    .update(updates)
+    .eq("id", id);
+  return { error: error?.message ?? null };
+}
+
+export async function serverDeleteService(id: string) {
+  const supabase = await createAdminSupabase();
+  const { error } = await (supabase.from("services") as any).delete().eq("id", id);
+  return { error: error?.message ?? null };
 }
