@@ -1,7 +1,8 @@
 "use client";
 
-import { Phone, Check, X, Clock, Scissors } from "lucide-react";
+import { Phone, Check, X, Clock, Scissors, MessageCircle, PhoneCall } from "lucide-react";
 import { PhoneDisplay } from "@/components/shared/phone-display";
+import { phoneLink, whatsappLink } from "@/lib/phone";
 
 type QueueEntry = {
   id: string;
@@ -68,10 +69,26 @@ export function QueueList({ entries, dict, onComplete, onNoShow }: Props) {
                 {timeAgo(entry.created_at)}
               </p>
               {entry.customer_phone && (
-                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                  <Phone className="h-3 w-3 shrink-0" />
-                  <PhoneDisplay phone={entry.customer_phone} />
-                </p>
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <Phone className="h-3 w-3 shrink-0 text-muted-foreground" />
+                  <PhoneDisplay phone={entry.customer_phone} className="text-xs text-muted-foreground" />
+                  <a
+                    href={phoneLink(entry.customer_phone)}
+                    className="inline-flex items-center gap-0.5 rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary hover:bg-primary/20 transition"
+                    title={entry.customer_phone}
+                  >
+                    <PhoneCall className="h-2.5 w-2.5" />
+                  </a>
+                  <a
+                    href={whatsappLink(entry.customer_phone)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-0.5 rounded-md bg-[#25D366]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#25D366] hover:bg-[#25D366]/20 transition"
+                    title={entry.customer_phone}
+                  >
+                    <MessageCircle className="h-2.5 w-2.5" />
+                  </a>
+                </div>
               )}
             </div>
           </div>
