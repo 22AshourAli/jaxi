@@ -17,7 +17,8 @@ export function phoneLink(phone: string): string {
   return `tel:+2${digits}`;
 }
 
-export function whatsappLink(phone: string): string {
+export function whatsappLink(phone: string, text?: string): string {
   const digits = phone.replace(/\D/g, "");
-  return `https://wa.me/2${digits}`;
+  const base = `https://wa.me/2${digits}`;
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 }

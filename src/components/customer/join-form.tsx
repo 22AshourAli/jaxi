@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useNotification } from "@/hooks/use-notification";
 import { useToast } from "@/components/shared/toast";
 import { Logo } from "@/components/shared/logo";
+import { formatPhoneDisplay, whatsappLink } from "@/lib/phone";
 import confetti from "canvas-confetti";
 import {
   Loader2,
@@ -14,11 +15,12 @@ import {
   AlertCircle,
   Bell,
   BellOff,
-  Smartphone,
   Users,
   Clock,
   PartyPopper,
   XCircle,
+  MessageCircle,
+  ExternalLink,
 } from "lucide-react";
 
 type Props = { locale: string; dict: any };
@@ -58,7 +60,7 @@ export function JoinForm({ locale, dict }: Props) {
   const [turnCalled, setTurnCalled] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [queueAvailable, setQueueAvailable] = useState(true);
-  const [whatsappSent, setWhatsappSent] = useState(false);
+  const [whatsappClicked, setWhatsappClicked] = useState(false);
 
   // Services
   const [services, setServices] = useState<any[]>([]);
@@ -421,20 +423,6 @@ export function JoinForm({ locale, dict }: Props) {
       setTicketNumber(nextNumber);
       setPeopleAhead(ahead);
 
-      // Fire-and-forget WhatsApp confirmation
-      try {
-        const { sendQueueConfirmation } = await import("@/actions/notifications");
-        const sent = await sendQueueConfirmation(
-          phone.replace(/\D/g, ""),
-          shop.name,
-          nextNumber,
-          ahead,
-          ahead * avgService,
-          locale as "ar" | "en"
-        );
-        setWhatsappSent(sent);
-      } catch {}
-
       setSubmitted(true);
       showToast(
         locale === "ar" ? `تم الحجز! رقم دورك #${nextNumber}` : `Booked! Your turn #${nextNumber}`,
@@ -680,21 +668,35 @@ export function JoinForm({ locale, dict }: Props) {
           </button>
         </div>
 
-        <div
-          className="animate-slide-up flex items-center justify-between rounded-xl border border-border bg-card p-3.5"
-          style={{ animationDelay: "400ms", animationFillMode: "backwards" }}
+        <a
+          href={whatsappLink(
+            phone,
+            locale === "ar"
+              ? `مرحباً جاكسي 👋\n\nرقم دوري: #${ticketNumber}\nالأشخاص قبلي: ${peopleAhead}\n\nأريد متابعة دوري عبر واتساب`
+              : `Hi Jaxi 👋\n\nMy turn: #${ticketNumber}\nPeople ahead: ${peopleAhead}\n\nI want to track my turn via WhatsApp`
+          )}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setWhatsappClicked(true)}
+          className={`flex w-full items-center justify-between rounded-xl border p-3.5 transition-all ${
+            whatsappClicked
+              ? "border-success/30 bg-success/5"
+              : "border-border bg-card hover:border-success/20 hover:bg-success/[0.02]"
+          }`}
         >
           <span className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Smartphone className="h-4 w-4" />
-            {locale === "ar" ? "إشعار واتساب" : "WhatsApp Notification"}
+            <MessageCircle className="h-4 w-4 text-[#25D366]" />
+            {locale === "ar" ? "متابعة عبر واتساب" : "Track via WhatsApp"}
           </span>
-          <span className={`flex items-center gap-1 text-xs font-medium ${whatsappSent ? "text-success" : "text-muted-foreground"}`}>
-            {whatsappSent ? <CheckCircle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-            {whatsappSent
-              ? (locale === "ar" ? "مرسل" : "Sent")
-              : (locale === "ar" ? "جاري الإرسال..." : "Sending...")}
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
+            {whatsappClicked ? (locale === "ar" ? "تم الفتح" : "Opened") : (
+              <>
+                <ExternalLink className="h-3 w-3" />
+                {locale === "ar" ? "فتح" : "Open"}
+              </>
+            )}
           </span>
-        </div>
+        </a>
 
 
       </div>
