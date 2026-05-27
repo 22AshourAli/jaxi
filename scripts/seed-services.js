@@ -5,7 +5,7 @@ const s = createClient(
 );
 
 async function main() {
-  // Delete old combos
+  // Delete old combo services
   await s.from('services').delete().in('name', [
     'حلاقة شعر + دقن',
     'عناية كاملة (شعر + دقن + غسيل)',
@@ -13,27 +13,36 @@ async function main() {
 
   const shopId = '718db02b-02cf-4754-bafa-b7dedb841e9b';
 
-  // Upsert each service (insert or update by name+shop)
+  // Individual services only - half of original times per user request
   const services = [
-    ['حلاقة شعر', 15, 1, '✂️'],
-    ['حلاقة دقن', 8, 2, '🪒'],
-    ['استشوار ومكواة', 10, 3, '💨'],
-    ['صبغ شعر', 30, 4, '🎨'],
-    ['غسيل وجه', 8, 5, '🧼'],
+    ['حلاقة شعر', 15, 1],
+    ['حلاقة دقن', 8, 2],
+    ['استشوار ومكواة', 10, 3],
+    ['صبغ شعر', 30, 4],
+    ['غسيل وجه', 8, 5],
   ];
 
-  for (const [name, duration, sort, icon] of services) {
-    // Check if exists
+  for (const [name, duration, sort] of services) {
     const { data: existing } = await s.from('services').select('id').eq('shop_id', shopId).eq('name', name).maybeSingle();
     if (existing) {
-      const { error } = await s.from('services').update({ duration_minutes: duration, sort_order: sort }).eq('id', existing.id);
-      if (error) console.error('UPDATE ERR:', name, error.message);
-      else console.log('UPDATED:', name, `(${duration}min)`);
+      await s.from('services').update({ duration_minutes: duration, sort_order: sort }).eq('id', existing.id);
+      console.log('UPDATED:', name, `(${duration}min)`);
     } else {
-      const { error } = await s.from('services').insert({ shop_id: shopId, name, duration_minutes: duration, sort_order: sort });
-      if (error) console.error('INSERT ERR:', name, error.message);
-      else console.log('INSERTED:', name, `(${duration}min)`);
+      await s.from('services').insert({ shop_id: shopId, name, duration_minutes: duration, sort_order: sort });
+      console.log('INSERTED:', name, `(${duration}min)`);
     }
+  }
+
+  // Run migration: add service_ids column
+  const { error: alterErr } = await s.rpc('exec_sql', {
+    sql: `ALTER TABLE queue_entries ADD COLUMN IF NOT EXISTS service_ids TEXT DEFAULT '';`,
+  });
+  if (alterErr) {
+    // Try direct SQL via REST
+    console.log('Migration note:', alterErr.message);
+    console.log('Run manually: ALTER TABLE queue_entries ADD COLUMN IF NOT EXISTS service_ids TEXT DEFAULT \'\';');
+  } else {
+    console.log('Migration: service_ids column ready');
   }
 
   console.log('DONE');

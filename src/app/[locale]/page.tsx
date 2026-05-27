@@ -255,7 +255,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10 group-hover:scale-110 transition-transform">
                 <Phone className="h-5 w-5 text-success" />
               </div>
-              <span className="text-sm font-medium">+20 109 402 2327</span>
+              <span className="text-sm font-medium" dir="ltr">010 940 22327</span>
               <span className="text-xs text-muted-foreground">({isRtl ? "واتساب" : "WhatsApp"})</span>
             </a>
             <a
@@ -265,7 +265,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 group-hover:scale-110 transition-transform">
                 <Phone className="h-5 w-5 text-primary" />
               </div>
-              <span className="text-sm font-medium">+20 109 402 2327</span>
+              <span className="text-sm font-medium" dir="ltr">010 940 22327</span>
               <span className="text-xs text-muted-foreground">({isRtl ? "اتصال" : "Call"})</span>
             </a>
             <div className="flex items-center justify-center gap-3 rounded-xl border border-border bg-card/50 px-5 py-4 backdrop-blur-sm">
@@ -295,7 +295,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           <div className="mb-5">
             <Logo size="md" />
           </div>
-          <p className="mt-1">+20 109 402 2327</p>
+          <p className="mt-1" dir="ltr">010 940 22327</p>
           <p className="mt-4 text-xs">&copy; {new Date().getFullYear()} {shop?.name || dict.site.title}. {isRtl ? "جميع الحقوق محفوظة" : "All rights reserved"}</p>
         </div>
       </footer>

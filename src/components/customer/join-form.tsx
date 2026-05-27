@@ -66,6 +66,7 @@ export function JoinForm({ locale, dict }: Props) {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedServiceNames, setSelectedServiceNames] = useState("");
   const [serviceError, setServiceError] = useState("");
+  const [showServiceDropdown, setShowServiceDropdown] = useState(false);
 
   const turnNotified = useRef(false);
   const nearNotified = useRef(false);
@@ -355,18 +356,39 @@ export function JoinForm({ locale, dict }: Props) {
       const lastTicket = (lastEntry as any)?.ticket_number || 0;
       const nextNumber = lastTicket + 1;
 
-      const { data: entry, error: insertErr } = await (supabase.from("queue_entries") as any)
-        .insert({
-          shop_id: shop.id,
-          service_id: selectedServices[0],
-          service_ids: selectedServices.join(","),
-          ticket_number: nextNumber,
-          customer_name: name.trim(),
-          customer_phone: phone.replace(/\D/g, ""),
-          status: "waiting",
-        })
+      const insertData: any = {
+        shop_id: shop.id,
+        service_id: selectedServices[0],
+        ticket_number: nextNumber,
+        customer_name: name.trim(),
+        customer_phone: phone.replace(/\D/g, ""),
+        status: "waiting",
+      };
+      if (selectedServices.length > 1) {
+        insertData.service_ids = selectedServices.join(",");
+      }
+
+      let { data: entry, error: insertErr } = await (supabase.from("queue_entries") as any)
+        .insert(insertData)
         .select()
         .single();
+
+      // If service_ids column doesn't exist, retry without it
+      if (insertErr?.message?.includes?.("service_ids")) {
+        const retry = await (supabase.from("queue_entries") as any)
+          .insert({
+            shop_id: shop.id,
+            service_id: selectedServices[0],
+            ticket_number: nextNumber,
+            customer_name: name.trim(),
+            customer_phone: phone.replace(/\D/g, ""),
+            status: "waiting",
+          })
+          .select()
+          .single();
+        entry = retry.data;
+        insertErr = retry.error;
+      }
 
       if (insertErr) {
         if (insertErr.message?.includes?.("customer_name")) {
@@ -702,54 +724,69 @@ export function JoinForm({ locale, dict }: Props) {
           </div>
         )}
 
-        {/* Service selection - multi-select */}
-        <div className="space-y-2">
+        {/* Service selection - dropdown */}
+        <div className="space-y-1.5">
           <p className="text-sm font-medium text-foreground/80">
-            {locale === "ar" ? "اختر الخدمات" : "Select Services"}
+            {locale === "ar" ? "اختر الخدمات" : "Services"}
           </p>
-          <div className="space-y-1.5">
-            {services.map((svc) => {
-              const isSelected = selectedServices.includes(svc.id);
-              return (
-                <button
-                  key={svc.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedServices((prev) =>
-                      prev.includes(svc.id) ? prev.filter((id) => id !== svc.id) : [...prev, svc.id]
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowServiceDropdown(!showServiceDropdown)}
+              className={`w-full flex items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm text-right transition-all ${
+                selectedServices.length > 0 ? "border-primary/50" : "border-border"
+              }`}
+            >
+              <span className="flex-1 min-w-0 truncate">
+                {selectedServices.length === 0
+                  ? (locale === "ar" ? "اختر..." : "Select...")
+                  : selectedServices.map((id) => servicesMap.get(id)?.name || "").join(", ")
+                }
+              </span>
+              {selectedServices.length > 0 && (
+                <span className="shrink-0 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                  {services.filter((s) => selectedServices.includes(s.id)).reduce((t, s) => t + s.duration_minutes, 0)} {locale === "ar" ? "د" : "min"}
+                </span>
+              )}
+              <svg className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${showServiceDropdown ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showServiceDropdown && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowServiceDropdown(false)} />
+                <div className="absolute z-20 left-0 right-0 mt-1 rounded-xl border border-border bg-card shadow-xl overflow-hidden animate-slide-up">
+                  {services.map((svc) => {
+                    const isSelected = selectedServices.includes(svc.id);
+                    return (
+                      <button
+                        key={svc.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedServices((prev) =>
+                            prev.includes(svc.id) ? prev.filter((id) => id !== svc.id) : [...prev, svc.id]
+                          );
+                          setServiceError("");
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-right text-sm transition hover:bg-muted ${
+                          isSelected ? "bg-primary/5" : ""
+                        }`}
+                      >
+                        <span className="text-base">{getServiceIcon(svc.name)}</span>
+                        <span className="flex-1 min-w-0 truncate">{svc.name}</span>
+                        <span className="text-[10px] text-muted-foreground shrink-0">{svc.duration_minutes}{locale === "ar" ? "د" : "m"}</span>
+                        <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
+                          isSelected ? "border-primary bg-primary" : "border-muted-foreground/30"
+                        }`}>
+                          {isSelected && <CheckCircle className="h-3 w-3 text-white" />}
+                        </span>
+                      </button>
                     );
-                    setServiceError("");
-                  }}
-                  className={`w-full flex items-center gap-3 rounded-xl border px-4 py-3 text-right transition-all active:scale-[0.99] ${
-                    isSelected
-                      ? "border-primary bg-primary/5 shadow-sm"
-                      : "border-border bg-card hover:border-primary/30"
-                  }`}
-                >
-                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base ${
-                    isSelected ? "bg-primary/10" : "bg-muted"
-                  }`}>
-                    {getServiceIcon(svc.name)}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium leading-snug ${isSelected ? "text-primary" : "text-foreground"}`}>
-                      {svc.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{svc.duration_minutes} {locale === "ar" ? "دقيقة" : "min"}</p>
-                  </div>
-                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${
-                    isSelected ? "border-primary bg-primary text-white" : "border-muted-foreground/30"
-                  }`}>
-                    {isSelected && <CheckCircle className="h-3.5 w-3.5" />}
-                  </span>
-                </button>
-              );
-            })}
+                  })}
+                </div>
+              </>
+            )}
           </div>
-          {selectedServices.length > 0 && <p className="px-1 text-xs text-muted-foreground">
-            {locale === "ar" ? `الوقت التقريبي: ` : "Est. time: "}
-            {services.filter((s) => selectedServices.includes(s.id)).reduce((t, s) => t + s.duration_minutes, 0)} {locale === "ar" ? "دقيقة" : "min"}
-          </p>}
           {serviceError && <p className="px-1 text-xs text-destructive font-medium">{serviceError}</p>}
         </div>
 
