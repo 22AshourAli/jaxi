@@ -704,6 +704,15 @@ export function JoinForm({ locale, dict }: Props) {
   // ── FORM ──
   return (
     <div className="w-full max-w-md mx-auto py-6 px-4">
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => router.push(`/${locale}`)}
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition"
+        >
+          <ArrowRight className={`h-3 w-3 ${isRtl ? "rotate-180" : ""}`} />
+          {locale === "ar" ? "الرئيسية" : "Home"}
+        </button>
+      </div>
       <div className="text-center mb-6 animate-fade-in">
         <div className="mx-auto mb-4 w-fit">
           <Logo size="lg" />
