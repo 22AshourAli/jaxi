@@ -72,6 +72,8 @@ export function JoinForm({ locale, dict }: Props) {
 
   const turnNotified = useRef(false);
   const nearNotified = useRef(false);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const NOTIFY_LS_KEY = "dorak_notify_enabled";
 
   // Fetch services on mount
   useEffect(() => {
@@ -92,6 +94,14 @@ export function JoinForm({ locale, dict }: Props) {
 
   // Recover from localStorage on mount
   useEffect(() => {
+    // Restore notification preference
+    try {
+      const savedNotify = localStorage.getItem(NOTIFY_LS_KEY);
+      if (savedNotify === "true") {
+        setBrowserNotifyEnabled(true);
+      }
+    } catch {}
+
     try {
       const saved = localStorage.getItem(LS_KEY);
       if (!saved) return;
@@ -213,8 +223,17 @@ export function JoinForm({ locale, dict }: Props) {
       )
       .subscribe();
 
+    // Polling fallback every 15s in case Realtime drops
+    pollingRef.current = setInterval(fetchLiveData, 15000);
+
+    // Auto-request notification permission
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
     return () => {
       supabase.removeChannel(channel);
+      if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, [shopId, ticketNumber, entryId, cancelled, completed, supabase]);
 
@@ -446,6 +465,7 @@ export function JoinForm({ locale, dict }: Props) {
     }
     const next = !browserNotifyEnabled;
     setBrowserNotifyEnabled(next);
+    try { localStorage.setItem(NOTIFY_LS_KEY, next ? "true" : "false"); } catch {}
     if (next) {
       sendNotification(
         locale === "ar" ? "✅ تم تفعيل الإشعارات" : "✅ Notifications Enabled",
@@ -634,36 +654,42 @@ export function JoinForm({ locale, dict }: Props) {
           className="animate-slide-up space-y-2"
           style={{ animationDelay: "320ms", animationFillMode: "backwards" }}
         >
+          {!browserNotifyEnabled && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400 flex items-center gap-2">
+              <Bell className="h-3.5 w-3.5 shrink-0" />
+              {locale === "ar"
+                ? "فعّل الإشعارات عشان ننبّهك لما يجي دورك"
+                : "Enable notifications so we alert you when it's your turn"}
+            </div>
+          )}
           <button
             onClick={handleToggleBrowserNotify}
-            className={`w-full flex items-center justify-between rounded-xl border p-3.5 transition-all ${
+            className={`w-full flex items-center justify-between rounded-xl border p-3.5 transition-all active:scale-[0.98] ${
               browserNotifyEnabled
-                ? "border-primary/30 bg-primary/5 text-foreground shadow-sm"
+                ? "border-primary/30 bg-primary/5 text-foreground shadow-sm ring-1 ring-primary/20"
                 : "border-border bg-card text-muted-foreground hover:border-primary/20 hover:bg-primary/[0.02]"
             }`}
           >
-            <span className="flex items-center gap-2 text-sm">
+            <span className="flex items-center gap-2 text-sm font-medium">
               {browserNotifyEnabled ? (
                 <Bell className="h-4 w-4 text-primary" />
               ) : (
                 <BellOff className="h-4 w-4" />
               )}
-              {dict.customer.browserNotify}
+              {browserNotifyEnabled
+                ? (locale === "ar" ? "🔔 الإشعارات مفعّلة" : "🔔 Notifications On")
+                : (locale === "ar" ? "تفعيل الإشعارات" : "Enable Notifications")}
             </span>
             <span
-              className={`text-xs font-medium px-2 py-0.5 rounded-full transition-all ${
+              className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-all ${
                 browserNotifyEnabled
                   ? "bg-success/10 text-success"
                   : "bg-muted text-muted-foreground"
               }`}
             >
               {browserNotifyEnabled
-                ? locale === "ar"
-                  ? "مفعل"
-                  : "On"
-                : locale === "ar"
-                ? "تشغيل"
-                : "Enable"}
+                ? locale === "ar" ? "مفعل" : "On"
+                : locale === "ar" ? "تشغيل" : "Enable"}
             </span>
           </button>
         </div>
