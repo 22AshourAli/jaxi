@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/ar/dashboard/", "/en/dashboard/"],
     },
-    sitemap: "https://dawrk.app/sitemap.xml",
+    sitemap: "https://jaxi.vercel.app/sitemap.xml",
   };
 }
