@@ -22,7 +22,7 @@ export function getServiceNames(
 ): string {
   const ids = entry.service_ids
     ? entry.service_ids.split(",").filter(Boolean)
-    : entry.customer_name
+    : entry.customer_name?.includes("||")
       ? decodeCustomerName(entry.customer_name).serviceIds
       : entry.service_id
         ? [entry.service_id]
