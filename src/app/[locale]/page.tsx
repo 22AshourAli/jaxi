@@ -8,7 +8,6 @@ import { Logo } from "@/components/shared/logo";
 import { LandingQueueStatus } from "@/components/landing/queue-status";
 import { InstallPWA } from "@/components/shared/install-pwa";
 import { VideoModal } from "@/components/home/video-modal";
-import Image from "next/image";
 import {
   Scissors,
   ArrowRight,
@@ -233,14 +232,15 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                 data-animate-item
                 className="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-1"
               >
-                <Image
-                  src={item.src}
-                  alt={item.label}
-                  fill
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-background to-primary/5">
+                  <img
+                    src={item.src}
+                    alt={item.label}
+                    loading="lazy"
+                    className="h-full w-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <p className="font-semibold text-sm sm:text-base text-white drop-shadow-lg">{item.label}</p>
                 </div>
