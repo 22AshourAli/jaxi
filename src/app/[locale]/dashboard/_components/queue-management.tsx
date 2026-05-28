@@ -10,7 +10,7 @@ import { serverCallNext, serverComplete, serverNoShow, serverAddCustomer, server
 import { phoneLink, whatsappLink, formatPhoneDisplay } from "@/lib/phone";
 import { getServiceNames, decodeCustomerName } from "@/lib/booking";
 import { PhoneDisplay } from "@/components/shared/phone-display";
-import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, User, Trash2, MessageCircle, ChevronDown, History, Scissors, Sparkles } from "lucide-react";
+import { Users, Clock, UserCheck, ArrowRight, Loader2, QrCode, UserPlus, X, Check, Phone, Trash2, MessageCircle, ChevronDown, History, Scissors, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
 import { Skeleton, QueueSkeleton, StatsSkeleton } from "@/components/shared/skeleton";
 
 type Service = {
@@ -49,6 +49,8 @@ export function QueueManagement({ locale, dict }: Props) {
   const [addName, setAddName] = useState("");
   const [addPhone, setAddPhone] = useState("");
   const [addServices, setAddServices] = useState<string[]>([] as string[]);
+  const [showAddServiceDropdown, setShowAddServiceDropdown] = useState(false);
+  const [fullServices, setFullServices] = useState<any[]>([]);
   const [addError, setAddError] = useState("");
   const [addLoading, setAddLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"waiting" | "completed">("waiting");
@@ -67,7 +69,7 @@ export function QueueManagement({ locale, dict }: Props) {
 
       // Fetch services for mapping
       const { data: svcData } = await (supabase.from("services") as any)
-        .select("id, name")
+        .select("id, name, duration_minutes")
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       const svcMap = new Map<string, string>();
@@ -76,6 +78,7 @@ export function QueueManagement({ locale, dict }: Props) {
           svcMap.set(svc.id, svc.name);
         }
         setServices(svcMap);
+        setFullServices(svcData as any[]);
         servicesRef.current = svcMap;
       }
 
@@ -209,6 +212,19 @@ export function QueueManagement({ locale, dict }: Props) {
   }
 
   const addDigits = (v: string) => v.replace(/\D/g, "");
+
+  function formatPhone(v: string): string {
+    const d = v.replace(/\D/g, "");
+    if (!d) return "";
+    if (d.startsWith("01")) {
+      if (d.length <= 4) return d;
+      if (d.length <= 7) return `${d.slice(0, 4)} ${d.slice(4)}`;
+      return `${d.slice(0, 4)} ${d.slice(4, 7)} ${d.slice(7, 11)}`;
+    }
+    if (d.length <= 3) return d;
+    if (d.length <= 6) return `${d.slice(0, 3)} ${d.slice(3)}`;
+    return `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`;
+  }
 
   async function handleAddCustomer() {
     if (!addName.trim()) {
@@ -588,80 +604,126 @@ export function QueueManagement({ locale, dict }: Props) {
             </div>
 
             {addError && (
-              <div className="mb-3 rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">{addError}</div>
+              <div className="mb-3 flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                <span>{addError}</span>
+              </div>
             )}
 
-              <div className="space-y-3">
+            <div className="space-y-4">
+              {/* Name */}
               <div>
-                <label htmlFor="add-name" className="block mb-1 text-xs font-medium text-muted-foreground">
+                <label htmlFor="add-name" className="mb-1.5 block text-xs font-medium text-muted-foreground">
                   {locale === "ar" ? "الاسم" : "Name"}
                 </label>
-                <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
-                  <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <div className="rounded-xl border border-border bg-background px-4 py-3 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
                   <input
                     id="add-name"
                     type="text"
                     value={addName}
-                    onChange={(e) => setAddName(e.target.value)}
-                    className="w-full bg-transparent text-sm outline-none"
+                    onChange={(e) => { setAddName(e.target.value); setAddError(""); }}
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
                     placeholder={locale === "ar" ? "اسم العميل" : "Customer name"}
                     dir={isRtl ? "rtl" : "ltr"}
                     autoFocus
                   />
                 </div>
               </div>
+
+              {/* Phone */}
               <div>
-                <label htmlFor="add-phone" className="block mb-1 text-xs font-medium text-muted-foreground">
+                <label htmlFor="add-phone" className="mb-1.5 block text-xs font-medium text-muted-foreground">
                   {locale === "ar" ? "رقم الجوال" : "Phone"}
                 </label>
-                <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
-                  <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
+                  <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
                   <input
                     id="add-phone"
                     type="tel"
                     value={addPhone}
-                    onChange={(e) => setAddPhone(e.target.value)}
-                    className="w-full bg-transparent text-sm outline-none"
-                    placeholder="05X XXX XXXX"
+                    onChange={(e) => { setAddPhone(formatPhone(e.target.value)); setAddError(""); }}
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/40 tracking-wider"
+                    placeholder="01X XXX XXXX"
                     dir="ltr"
                   />
                 </div>
               </div>
-              {/* Service selection */}
+
+              {/* Service selection - dropdown */}
               <div>
-                <label className="block mb-1.5 text-xs font-medium text-muted-foreground">
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
                   {locale === "ar" ? "الخدمات" : "Services"}
                 </label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {Array.from(services).map(([id, name]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => setAddServices((prev) => prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id])}
-                      className={`rounded-lg border px-2.5 py-2 text-xs font-medium transition ${
-                        addServices.includes(id)
-                          ? "border-primary bg-primary/5 text-primary"
-                          : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
-                      }`}
-                    >
-                      {name}
-                    </button>
-                  ))}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddServiceDropdown(!showAddServiceDropdown)}
+                    className={`w-full flex items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm text-right transition-all ${
+                      addServices.length > 0 ? "border-primary/50" : "border-border"
+                    }`}
+                  >
+                    <span className="flex-1 min-w-0 truncate text-right">
+                      {addServices.length === 0
+                        ? (locale === "ar" ? "اختر..." : "Select...")
+                        : addServices.map((id) => services.get(id) || "").join(", ")
+                      }
+                    </span>
+                    {addServices.length > 0 && (
+                      <span className="shrink-0 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        {fullServices.filter((s) => addServices.includes(s.id)).reduce((t, s) => t + s.duration_minutes, 0)} {locale === "ar" ? "د" : "min"}
+                      </span>
+                    )}
+                    <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${showAddServiceDropdown ? "rotate-180" : ""}`} />
+                  </button>
+                  {showAddServiceDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setShowAddServiceDropdown(false)} />
+                      <div className="absolute z-20 left-0 right-0 mt-1 rounded-xl border border-border bg-card shadow-xl overflow-hidden animate-slide-up">
+                        {fullServices.map((svc) => {
+                          const isSelected = addServices.includes(svc.id);
+                          return (
+                            <button
+                              key={svc.id}
+                              type="button"
+                              onClick={() => {
+                                setAddServices((prev) =>
+                                  prev.includes(svc.id) ? prev.filter((id) => id !== svc.id) : [...prev, svc.id]
+                                );
+                                setAddError("");
+                              }}
+                              className={`w-full flex items-center gap-3 px-4 py-3 text-right text-sm transition hover:bg-muted ${
+                                isSelected ? "bg-primary/5" : ""
+                              }`}
+                            >
+                              <span className="text-base">{getServiceIcon(svc.name)}</span>
+                              <span className="flex-1 min-w-0 truncate">{svc.name}</span>
+                              <span className="text-[10px] text-muted-foreground shrink-0">{svc.duration_minutes}{locale === "ar" ? "د" : "m"}</span>
+                              <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
+                                isSelected ? "border-primary bg-primary" : "border-muted-foreground/30"
+                              }`}>
+                                {isSelected && <CheckCircle className="h-3 w-3 text-white" />}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 flex gap-2">
+            <div className="mt-5 flex gap-2">
               <button
                 onClick={() => { setShowAddModal(false); setAddError(""); }}
-                className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium transition hover:bg-muted"
+                className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium transition hover:bg-muted active:scale-95"
               >
                 {dict.common.cancel}
               </button>
               <button
                 onClick={handleAddCustomer}
                 disabled={addLoading}
-                className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+                className="flex-1 rounded-lg bg-gradient-to-r from-primary to-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
               >
                 {addLoading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : dict.common.confirm}
               </button>
@@ -671,4 +733,16 @@ export function QueueManagement({ locale, dict }: Props) {
       )}
     </div>
   );
+}
+
+function getServiceIcon(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes("شعر") && n.includes("دقن")) return "💈";
+  if (n.includes("شعر") || n.includes("hair")) return "✂️";
+  if (n.includes("دقن") || n.includes("beard") || n.includes("لحية")) return "🪒";
+  if (n.includes("استشوار") || n.includes("مكوا") || n.includes("blow")) return "💨";
+  if (n.includes("صبغ") || n.includes("color") || n.includes("لون")) return "🎨";
+  if (n.includes("غسيل") || n.includes("face") || n.includes("wash")) return "🧼";
+  if (n.includes("عناية") || n.includes("complete") || n.includes("package")) return "⭐";
+  return "✂️";
 }
