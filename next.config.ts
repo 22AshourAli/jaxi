@@ -2,18 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  async rewrites() {
-    return [
-      {
-        source: "/images/:path*",
-        destination: "/api/static/images/:path*",
-      },
-      {
-        source: "/videos/:path*",
-        destination: "/api/static/videos/:path*",
-      },
-    ];
-  },
   async headers() {
     return [
       {
