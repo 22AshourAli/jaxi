@@ -64,9 +64,9 @@ export function VideoModal({ isRtl }: VideoModalProps) {
               controls
               autoPlay
               className="h-full w-full"
-              poster="/api/static/images/haircut.jpg"
+              poster="/images/haircut.jpg"
             >
-              <source src="/api/static/videos/shop-tour.mp4" type="video/mp4" />
+              <source src="/videos/shop-tour.mp4" type="video/mp4" />
               {isRtl ? "المتصفح لا يدعم تشغيل الفيديو" : "Your browser does not support the video tag"}
             </video>
           </div>

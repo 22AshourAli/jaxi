@@ -222,10 +222,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4" data-animate-grid>
             {[
-              { label: isRtl ? "حلاقة عصرية" : "Modern Haircut", src: "/api/static/images/haircut.jpg" },
-              { label: isRtl ? "عناية باللحية" : "Beard Care", src: "/api/static/images/beard.jpg" },
-              { label: isRtl ? "بيئة نظيفة" : "Clean Environment", src: "/api/static/images/clean.jpg" },
-              { label: isRtl ? "استشوار احترافي" : "Professional Styling", src: "/api/static/images/blow-dry.jpg" },
+              { label: isRtl ? "حلاقة عصرية" : "Modern Haircut", src: "/images/haircut.jpg" },
+              { label: isRtl ? "عناية باللحية" : "Beard Care", src: "/images/beard.jpg" },
+              { label: isRtl ? "بيئة نظيفة" : "Clean Environment", src: "/images/clean.jpg" },
+              { label: isRtl ? "استشوار احترافي" : "Professional Styling", src: "/images/blow-dry.jpg" },
             ].map((item, i) => (
               <div
                 key={i}
