@@ -1,10 +1,12 @@
-const CACHE = "dawrk-v4";
+const CACHE = "jaxi-v5";
 const STATIC_ASSETS = [
   "/offline.html",
   "/icons/icon-192x192.svg",
   "/icons/icon-512x512.svg",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
+  "/icons/icon-192x192-maskable.png",
+  "/icons/icon-512x512-maskable.png",
   "/manifest.webmanifest",
 ];
 

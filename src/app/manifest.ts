@@ -15,12 +15,12 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["lifestyle", "utilities"],
     prefer_related_applications: false,
     icons: [
-      { src: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
-      { src: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
       { src: "/icons/icon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
       { src: "/icons/icon-512x512.svg", sizes: "512x512", type: "image/svg+xml" },
-      { src: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
-      { src: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+      { src: "/icons/icon-192x192-maskable.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
+      { src: "/icons/icon-512x512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

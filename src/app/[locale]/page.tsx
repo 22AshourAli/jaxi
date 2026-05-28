@@ -7,6 +7,8 @@ import { Header } from "@/components/shared/header";
 import { Logo } from "@/components/shared/logo";
 import { LandingQueueStatus } from "@/components/landing/queue-status";
 import { InstallPWA } from "@/components/shared/install-pwa";
+import { VideoModal } from "@/components/home/video-modal";
+import Image from "next/image";
 import {
   Scissors,
   ArrowRight,
@@ -18,8 +20,6 @@ import {
   Shield,
   Zap,
   HeartHandshake,
-  Quote,
-  Play,
   Award,
   Wind,
   UserCheck,
@@ -223,26 +223,26 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4" data-animate-grid>
             {[
-              { label: isRtl ? "حلاقة عصرية" : "Modern Haircut", gradient: "from-blue-400/20 to-purple-400/20", icon: "✂️" },
-              { label: isRtl ? "عناية باللحية" : "Beard Care", gradient: "from-amber-400/20 to-orange-400/20", icon: "🪒" },
-              { label: isRtl ? "بيئة نظيفة" : "Clean Environment", gradient: "from-emerald-400/20 to-teal-400/20", icon: "✨" },
-              { label: isRtl ? "استشوار احترافي" : "Professional Styling", gradient: "from-rose-400/20 to-pink-400/20", icon: "💨" },
+              { label: isRtl ? "حلاقة عصرية" : "Modern Haircut", src: "/images/haircut.jpg" },
+              { label: isRtl ? "عناية باللحية" : "Beard Care", src: "/images/beard.jpg" },
+              { label: isRtl ? "بيئة نظيفة" : "Clean Environment", src: "/images/clean.jpg" },
+              { label: isRtl ? "استشوار احترافي" : "Professional Styling", src: "/images/blow-dry.jpg" },
             ].map((item, i) => (
               <div
                 key={i}
                 data-animate-item
                 className="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-1"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} group-hover:scale-110 transition-transform duration-700`}>
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
-                </div>
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                  <span className="text-4xl sm:text-5xl mb-3 opacity-80 group-hover:scale-125 group-hover:opacity-100 transition-all duration-500">
-                    {item.icon}
-                  </span>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background/80 to-transparent pt-8">
-                    <p className="font-semibold text-sm sm:text-base">{item.label}</p>
-                  </div>
+                <Image
+                  src={item.src}
+                  alt={item.label}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <p className="font-semibold text-sm sm:text-base text-white drop-shadow-lg">{item.label}</p>
                 </div>
               </div>
             ))}
@@ -335,18 +335,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </p>
           </div>
 
-          <div className="mt-8 relative rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-primary/5 to-accent/5 aspect-video flex items-center justify-center group cursor-pointer" data-animate>
-            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
-            <div className="relative z-10 flex flex-col items-center gap-3">
-              <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-primary/20 backdrop-blur-sm group-hover:bg-primary/30 group-hover:scale-110 transition-all duration-500 shadow-xl">
-                <Play className="h-7 w-7 sm:h-9 sm:w-9 text-primary fill-primary ml-0.5" />
-              </div>
-              <p className="text-sm font-medium text-foreground/80">
-                {isRtl ? "شاهد الفيديو" : "Watch Video"}
-              </p>
-            </div>
-            {/* Decorative grid */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-30" />
+          <div data-animate>
+            <VideoModal isRtl={isRtl} />
           </div>
         </div>
       </section>
