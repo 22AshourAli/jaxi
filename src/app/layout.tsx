@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dorak-pearl.vercel.app"),
+  metadataBase: new URL("https://jaxi.vercel.app"),
   title: {
     default: "جاكسي",
     template: "%s | جاكسي",
@@ -58,7 +58,7 @@ export default function RootLayout({
           {`(function(){try{var t=localStorage.getItem("theme");var r=t||"system";if(r==="system"){r=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"}document.documentElement.setAttribute("data-theme",r)}catch(e){}try{var p=location.pathname;var m=p.match(/^\\/(ar|en)(\\/|$)/);if(m){document.documentElement.setAttribute("lang",m[1]);document.documentElement.setAttribute("dir",m[1]==="ar"?"rtl":"ltr")}}catch(e){}})()`}
         </Script>
         <Script id="schema-jsonld" type="application/ld+json" strategy="lazyOnload">
-          {`{"@context":"https://schema.org","@type":"BarberShop","name":"جاكسي","url":"https://dorak-pearl.vercel.app","telephone":"+201094022327","address":{"@type":"PostalAddress","addressLocality":"الناصرية","addressCountry":"EG"},"openingHours":"Sa-Th 10:00-22:00","priceRange":"$$"}`}
+          {`{"@context":"https://schema.org","@type":"BarberShop","name":"جاكسي","url":"https://jaxi.vercel.app","telephone":"+201094022327","address":{"@type":"PostalAddress","addressLocality":"الناصرية","addressCountry":"EG"},"openingHours":"Sa-Th 10:00-22:00","priceRange":"$$"}`}
         </Script>
         <Script id="sw-register" strategy="afterInteractive">
           {`if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").then(function(reg){reg.onupdatefound=function(){var installing=reg.installing;installing.onstatechange=function(){if(installing.state==="installed"&&navigator.serviceWorker.controller){if(confirm("نسخة جديدة متاحة! تحديث الآن؟\\nNew version available! Update now?")){window.location.reload()}}}}})}`}
