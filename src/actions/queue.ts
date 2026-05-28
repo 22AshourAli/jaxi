@@ -36,15 +36,27 @@ export async function serverAddCustomer(shopId: string, name: string, phone: str
     .maybeSingle();
   const next = ((last as any)?.ticket_number || 0) + 1;
 
-  const { error } = await (supabase.from("queue_entries") as any).insert({
+  const insertData: any = {
     shop_id: shopId,
-    service_id: serviceIds[0] || undefined,
-    service_ids: serviceIds.length > 0 ? serviceIds.join(",") : undefined,
+    service_id: serviceIds[0] || null,
     ticket_number: next,
     customer_name: name.trim(),
     customer_phone: phone.replace(/\D/g, ""),
     status: "waiting",
-  });
+  };
+  if (serviceIds.length > 0) {
+    insertData.service_ids = serviceIds.join(",");
+  }
+
+  let { error } = await (supabase.from("queue_entries") as any).insert(insertData);
+
+  // Retry without service_ids if column doesn't exist
+  if (error?.message?.includes?.("service_ids")) {
+    delete insertData.service_ids;
+    const retry = await (supabase.from("queue_entries") as any).insert(insertData);
+    error = retry.error;
+  }
+
   return { error: error?.message ?? null };
 }
 

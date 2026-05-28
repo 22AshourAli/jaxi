@@ -595,7 +595,7 @@ export function JoinForm({ locale, dict }: Props) {
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div className="animate-slide-up rounded-xl border border-border bg-card p-3 text-center shadow-sm">
             <Users className="mx-auto h-4 w-4 text-muted-foreground" />
             <p className="mt-1 text-2xl font-bold transition-all duration-300">{peopleAhead}</p>
@@ -774,16 +774,16 @@ export function JoinForm({ locale, dict }: Props) {
             <button
               type="button"
               onClick={() => setShowServiceDropdown(!showServiceDropdown)}
-              className={`w-full flex items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm text-right transition-all ${
-                selectedServices.length > 0 ? "border-primary/50" : "border-border"
-              }`}
-            >
-              <span className="flex-1 min-w-0 truncate">
-                {selectedServices.length === 0
-                  ? (locale === "ar" ? "اختر..." : "Select...")
-                  : selectedServices.map((id) => servicesMap.get(id)?.name || "").join(", ")
-                }
-              </span>
+              className={`w-full flex items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm transition-all ${
+                  selectedServices.length > 0 ? "border-primary/50" : "border-border"
+                }`}
+              >
+                <span className="flex-1 min-w-0 truncate">
+                  {selectedServices.length === 0
+                    ? (locale === "ar" ? "اختر..." : "Select...")
+                    : selectedServices.map((id) => servicesMap.get(id)?.name || "").join(", ")
+                  }
+                </span>
               {selectedServices.length > 0 && (
                 <span className="shrink-0 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                   {services.filter((s) => selectedServices.includes(s.id)).reduce((t, s) => t + s.duration_minutes, 0)} {locale === "ar" ? "د" : "min"}
@@ -796,7 +796,7 @@ export function JoinForm({ locale, dict }: Props) {
             {showServiceDropdown && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowServiceDropdown(false)} />
-                <div className="absolute z-20 left-0 right-0 mt-1 rounded-xl border border-border bg-card shadow-xl overflow-hidden animate-slide-up">
+                <div className="absolute z-20 left-0 right-0 mt-1 rounded-xl border border-border bg-card shadow-xl overflow-y-auto max-h-60 animate-slide-up">
                   {services.map((svc) => {
                     const isSelected = selectedServices.includes(svc.id);
                     return (
@@ -809,7 +809,7 @@ export function JoinForm({ locale, dict }: Props) {
                           );
                           setServiceError("");
                         }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-right text-sm transition hover:bg-muted ${
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-muted ${
                           isSelected ? "bg-primary/5" : ""
                         }`}
                       >

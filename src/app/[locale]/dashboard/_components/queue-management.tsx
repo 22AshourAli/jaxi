@@ -588,10 +588,11 @@ export function QueueManagement({ locale, dict }: Props) {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
           <div
-            className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-xl animate-slide-up"
+            className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-xl max-h-[85vh] flex flex-col animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
+            {/* Sticky header */}
+            <div className="flex items-center justify-between p-5 sm:p-6 pb-0 shrink-0">
               <h2 className="text-base font-semibold">
                 {locale === "ar" ? "إضافة عميل" : "Add Customer"}
               </h2>
@@ -603,62 +604,58 @@ export function QueueManagement({ locale, dict }: Props) {
               </button>
             </div>
 
-            {addError && (
-              <div className="mb-3 flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
-                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                <span>{addError}</span>
-              </div>
-            )}
+            {/* Scrollable body */}
+            <div className="overflow-y-auto p-5 sm:p-6 pt-4 space-y-4">
+              {addError && (
+                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{addError}</span>
+                </div>
+              )}
 
-            <div className="space-y-4">
               {/* Name */}
-              <div>
-                <label htmlFor="add-name" className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              <div className="space-y-1.5">
+                <label htmlFor="add-name" className="text-xs font-medium text-muted-foreground">
                   {locale === "ar" ? "الاسم" : "Name"}
                 </label>
-                <div className="rounded-xl border border-border bg-background px-4 py-3 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
-                  <input
-                    id="add-name"
-                    type="text"
-                    value={addName}
-                    onChange={(e) => { setAddName(e.target.value); setAddError(""); }}
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
-                    placeholder={locale === "ar" ? "اسم العميل" : "Customer name"}
-                    dir={isRtl ? "rtl" : "ltr"}
-                    autoFocus
-                  />
-                </div>
+                <input
+                  id="add-name"
+                  type="text"
+                  value={addName}
+                  onChange={(e) => { setAddName(e.target.value); setAddError(""); }}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all placeholder:text-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  placeholder={locale === "ar" ? "اسم العميل" : "Customer name"}
+                  dir={isRtl ? "rtl" : "ltr"}
+                  autoFocus
+                />
               </div>
 
               {/* Phone */}
-              <div>
-                <label htmlFor="add-phone" className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              <div className="space-y-1.5">
+                <label htmlFor="add-phone" className="text-xs font-medium text-muted-foreground">
                   {locale === "ar" ? "رقم الجوال" : "Phone"}
                 </label>
-                <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
-                  <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <input
-                    id="add-phone"
-                    type="tel"
-                    value={addPhone}
-                    onChange={(e) => { setAddPhone(formatPhone(e.target.value)); setAddError(""); }}
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/40 tracking-wider"
-                    placeholder="01X XXX XXXX"
-                    dir="ltr"
-                  />
-                </div>
+                <input
+                  id="add-phone"
+                  type="tel"
+                  value={addPhone}
+                  onChange={(e) => { setAddPhone(formatPhone(e.target.value)); setAddError(""); }}
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all placeholder:text-muted-foreground/40 tracking-wider focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  placeholder="01X XXX XXXX"
+                  dir="ltr"
+                />
               </div>
 
               {/* Service selection - dropdown */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">
                   {locale === "ar" ? "الخدمات" : "Services"}
                 </label>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setShowAddServiceDropdown(!showAddServiceDropdown)}
-                    className={`w-full flex items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm text-right transition-all ${
+                    className={`w-full flex items-center gap-2 rounded-xl border bg-background px-4 py-3 text-sm transition-all ${
                       addServices.length > 0 ? "border-primary/50" : "border-border"
                     }`}
                   >
@@ -678,7 +675,7 @@ export function QueueManagement({ locale, dict }: Props) {
                   {showAddServiceDropdown && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setShowAddServiceDropdown(false)} />
-                      <div className="absolute z-20 left-0 right-0 mt-1 rounded-xl border border-border bg-card shadow-xl overflow-hidden animate-slide-up">
+                      <div className="absolute z-20 left-0 right-0 mt-1 rounded-xl border border-border bg-card shadow-xl overflow-y-auto max-h-60 animate-slide-up">
                         {fullServices.map((svc) => {
                           const isSelected = addServices.includes(svc.id);
                           return (
@@ -691,7 +688,7 @@ export function QueueManagement({ locale, dict }: Props) {
                                 );
                                 setAddError("");
                               }}
-                              className={`w-full flex items-center gap-3 px-4 py-3 text-right text-sm transition hover:bg-muted ${
+                              className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-muted ${
                                 isSelected ? "bg-primary/5" : ""
                               }`}
                             >
@@ -711,22 +708,22 @@ export function QueueManagement({ locale, dict }: Props) {
                   )}
                 </div>
               </div>
-            </div>
 
-            <div className="mt-5 flex gap-2">
-              <button
-                onClick={() => { setShowAddModal(false); setAddError(""); }}
-                className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium transition hover:bg-muted active:scale-95"
-              >
-                {dict.common.cancel}
-              </button>
-              <button
-                onClick={handleAddCustomer}
-                disabled={addLoading}
-                className="flex-1 rounded-lg bg-gradient-to-r from-primary to-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
-              >
-                {addLoading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : dict.common.confirm}
-              </button>
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={() => { setShowAddModal(false); setAddError(""); }}
+                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium transition hover:bg-muted active:scale-95"
+                >
+                  {dict.common.cancel}
+                </button>
+                <button
+                  onClick={handleAddCustomer}
+                  disabled={addLoading}
+                  className="flex-1 rounded-lg bg-gradient-to-r from-primary to-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 transition hover:opacity-90 hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
+                >
+                  {addLoading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : dict.common.confirm}
+                </button>
+              </div>
             </div>
           </div>
         </div>

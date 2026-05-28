@@ -93,11 +93,7 @@ body {
   color: var(--foreground);
 }
 
-*:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
+/* Focus styles are handled per-element with focus:ring-2 */
 
 /* ── Keyframes ── */
 @keyframes spin { to { transform: rotate(360deg); } }
