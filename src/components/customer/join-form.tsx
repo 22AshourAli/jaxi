@@ -733,8 +733,8 @@ export function JoinForm({ locale, dict }: Props) {
           </span>
         </a>
 
-        {/* Cancel booking */}
-        <div className="border-t border-border pt-4 mt-2">
+        {/* Cancel / Reschedule */}
+        <div className="border-t border-border pt-4 mt-2 space-y-2">
           {showCancelConfirm ? (
             <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 space-y-3 animate-slide-up">
               <p className="text-xs font-medium text-destructive text-center">
@@ -763,15 +763,56 @@ export function JoinForm({ locale, dict }: Props) {
                     : (locale === "ar" ? "تأكيد الإلغاء" : "Confirm cancel")}
                 </button>
               </div>
+              <div className="text-center">
+                <button
+                  onClick={async () => {
+                    setCancelling(true);
+                    if (entryId) await serverCancelBooking(entryId);
+                    showToast(
+                      locale === "ar"
+                        ? "تم إلغاء الحجز، يمكنك أخذ دور جديد"
+                        : "Booking cancelled, you can get a new turn",
+                      "success"
+                    );
+                    handleBackToForm();
+                  }}
+                  disabled={cancelling}
+                  className="text-xs text-primary hover:underline font-medium"
+                >
+                  {locale === "ar" ? "إلغاء وأخذ دور جديد" : "Cancel & re-book"}
+                </button>
+              </div>
             </div>
           ) : (
-            <button
-              onClick={() => setShowCancelConfirm(true)}
-              className="w-full flex items-center justify-center gap-2 rounded-xl border border-destructive/20 px-4 py-3 text-xs font-medium text-destructive/70 transition hover:bg-destructive/5 hover:text-destructive active:scale-95"
-            >
-              <XCircle className="h-4 w-4" />
-              {locale === "ar" ? "إلغاء الحجز" : "Cancel booking"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCancelConfirm(true)}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-destructive/20 px-3 py-3 text-xs font-medium text-destructive/70 transition hover:bg-destructive/5 hover:text-destructive active:scale-95"
+              >
+                <XCircle className="h-4 w-4" />
+                {locale === "ar" ? "إلغاء" : "Cancel"}
+              </button>
+              <button
+                onClick={async () => {
+                  setCancelling(true);
+                  if (entryId) await serverCancelBooking(entryId);
+                  showToast(
+                    locale === "ar"
+                      ? "تم إلغاء الحجز، يمكنك أخذ دور جديد"
+                      : "Booking cancelled, you can re-book now",
+                    "success"
+                  );
+                  handleBackToForm();
+                }}
+                disabled={cancelling}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-primary/30 px-3 py-3 text-xs font-medium text-primary transition hover:bg-primary/5 active:scale-95 disabled:opacity-50"
+              >
+                <Clock className="h-4 w-4" />
+                {cancelling
+                  ? (locale === "ar" ? "جاري..." : "Working...")
+                  : (locale === "ar" ? "إعادة جدولة" : "Reschedule")}
+              </button>
+            </div>
           )}
         </div>
 
