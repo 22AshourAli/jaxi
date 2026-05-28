@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Ticket, Users, Clock, ArrowRight, Bell } from "lucide-react";
 
-const LS_KEY = "dorak_active_ticket";
+const LS_KEY = "jaxi_active_ticket";
 
 type TicketData = {
   entryId: string;

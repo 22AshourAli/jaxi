@@ -32,7 +32,7 @@ type QueueEntry = {
   status: string;
 };
 
-const LS_KEY = "dorak_active_ticket";
+const LS_KEY = "jaxi_active_ticket";
 
 export function JoinForm({ locale, dict }: Props) {
   const router = useRouter();
@@ -74,7 +74,7 @@ export function JoinForm({ locale, dict }: Props) {
   const turnNotified = useRef(false);
   const nearNotified = useRef(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const NOTIFY_LS_KEY = "dorak_notify_enabled";
+  const NOTIFY_LS_KEY = "jaxi_notify_enabled";
 
   // Fetch services on mount
   useEffect(() => {

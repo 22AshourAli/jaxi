@@ -1,6 +1,6 @@
 const CACHE = "jaxi-v5";
 const STATIC_ASSETS = [
-  "/offline.html",
+  "/api/static/offline.html",
   "/icons/icon-192x192.svg",
   "/icons/icon-512x512.svg",
   "/icons/icon-192x192.png",
@@ -72,7 +72,7 @@ self.addEventListener("fetch", (event) => {
           return res;
         })
         .catch(() =>
-          caches.match("/offline.html").then((cached) => cached || caches.match(event.request))
+          caches.match("/api/static/offline.html").then((cached) => cached || caches.match(event.request))
         )
     );
     return;
