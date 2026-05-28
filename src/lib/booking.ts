@@ -20,10 +20,10 @@ export function getServiceNames(
   entry: { service_ids?: string | null; service_id?: string | null; customer_name?: string | null },
   map: Map<string, string>
 ): string {
-  const ids = entry.service_ids
-    ? entry.service_ids.split(",").filter(Boolean)
-    : entry.customer_name?.includes("||")
-      ? decodeCustomerName(entry.customer_name).serviceIds
+  const ids = entry.customer_name?.includes("||")
+    ? decodeCustomerName(entry.customer_name).serviceIds
+    : entry.service_ids
+      ? entry.service_ids.split(",").filter(Boolean)
       : entry.service_id
         ? [entry.service_id]
         : [];

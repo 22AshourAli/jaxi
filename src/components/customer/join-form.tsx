@@ -8,6 +8,7 @@ import { useToast } from "@/components/shared/toast";
 import { Logo } from "@/components/shared/logo";
 import { formatPhoneDisplay, whatsappLink } from "@/lib/phone";
 import { encodeCustomerName } from "@/lib/booking";
+import { serverCancelBooking } from "@/actions/queue";
 import confetti from "canvas-confetti";
 import {
   Loader2,
@@ -62,6 +63,8 @@ export function JoinForm({ locale, dict }: Props) {
   const [completed, setCompleted] = useState(false);
   const [queueAvailable, setQueueAvailable] = useState(true);
   const [whatsappClicked, setWhatsappClicked] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   // Services
   const [services, setServices] = useState<any[]>([]);
@@ -490,6 +493,8 @@ export function JoinForm({ locale, dict }: Props) {
     setPeopleAhead(0);
     setCurrentlyServing(null);
     setBrowserNotifyEnabled(false);
+    setShowCancelConfirm(false);
+    setCancelling(false);
     localStorage.removeItem(LS_KEY);
   }
 
@@ -727,6 +732,48 @@ export function JoinForm({ locale, dict }: Props) {
             )}
           </span>
         </a>
+
+        {/* Cancel booking */}
+        <div className="border-t border-border pt-4 mt-2">
+          {showCancelConfirm ? (
+            <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 space-y-3 animate-slide-up">
+              <p className="text-xs font-medium text-destructive text-center">
+                {locale === "ar"
+                  ? "هل أنت متأكد من إلغاء الحجز؟"
+                  : "Are you sure you want to cancel?"}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setShowCancelConfirm(false); setCancelling(false); }}
+                  className="flex-1 rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted active:scale-95"
+                >
+                  {locale === "ar" ? "تراجع" : "Go back"}
+                </button>
+                <button
+                  onClick={async () => {
+                    setCancelling(true);
+                    if (entryId) await serverCancelBooking(entryId);
+                    setCancelled(true);
+                  }}
+                  disabled={cancelling}
+                  className="flex-1 rounded-lg bg-destructive px-3 py-2 text-xs font-medium text-white transition hover:opacity-90 active:scale-95 disabled:opacity-50"
+                >
+                  {cancelling
+                    ? (locale === "ar" ? "جاري الإلغاء..." : "Cancelling...")
+                    : (locale === "ar" ? "تأكيد الإلغاء" : "Confirm cancel")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowCancelConfirm(true)}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-destructive/20 px-4 py-3 text-xs font-medium text-destructive/70 transition hover:bg-destructive/5 hover:text-destructive active:scale-95"
+            >
+              <XCircle className="h-4 w-4" />
+              {locale === "ar" ? "إلغاء الحجز" : "Cancel booking"}
+            </button>
+          )}
+        </div>
 
 
       </div>

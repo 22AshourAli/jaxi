@@ -1,6 +1,7 @@
 "use server";
 
 import { createAdminSupabase } from "@/lib/supabase/server";
+import { encodeCustomerName } from "@/lib/booking";
 
 export async function serverCallNext(entryId: string, servingId: string | null) {
   const supabase = await createAdminSupabase();
@@ -26,6 +27,14 @@ export async function serverDeleteEntry(entryId: string) {
   return { error: error?.message ?? null };
 }
 
+export async function serverCancelBooking(entryId: string) {
+  const supabase = await createAdminSupabase();
+  const { error } = await (supabase.from("queue_entries") as any)
+    .update({ status: "cancelled" })
+    .eq("id", entryId);
+  return { error: error?.message ?? null };
+}
+
 export async function serverAddCustomer(shopId: string, name: string, phone: string, serviceIds: string[] = []) {
   const supabase = await createAdminSupabase();
   const { data: last } = await (supabase.from("queue_entries") as any)
@@ -40,7 +49,7 @@ export async function serverAddCustomer(shopId: string, name: string, phone: str
     shop_id: shopId,
     service_id: serviceIds[0] || null,
     ticket_number: next,
-    customer_name: name.trim(),
+    customer_name: serviceIds.length > 1 ? encodeCustomerName(name.trim(), serviceIds) : name.trim(),
     customer_phone: phone.replace(/\D/g, ""),
     status: "waiting",
   };
